@@ -7,7 +7,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.wtako.WTAKODeath.Commands.CommandWdt;
+import net.wtako.WTAKODeath.EventHandlers.DeathGuardListener;
+import net.wtako.WTAKODeath.EventHandlers.PlayerDeathGuardListener;
 import net.wtako.WTAKODeath.EventHandlers.PlayerDeathInfoListener;
+import net.wtako.WTAKODeath.Methods.DeathGuard;
 import net.wtako.WTAKODeath.Utils.Lang;
 
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -18,7 +21,7 @@ public final class Main extends JavaPlugin {
     private static Main             instance;
     public static YamlConfiguration LANG;
     public static File              LANG_FILE;
-    public static Logger            log = Logger.getLogger("WTAKOUtils");
+    public static Logger            log = Logger.getLogger("WTAKODeath");
 
     @Override
     public void onEnable() {
@@ -27,7 +30,14 @@ public final class Main extends JavaPlugin {
         getConfig().options().copyDefaults(true);
         getCommand(getProperty("mainCommand")).setExecutor(new CommandWdt());
         getServer().getPluginManager().registerEvents(new PlayerDeathInfoListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerDeathGuardListener(), this);
+        getServer().getPluginManager().registerEvents(new DeathGuardListener(), this);
         loadLang();
+    }
+
+    @Override
+    public void onDisable() {
+        DeathGuard.killAllDeathGuards();
     }
 
     public void loadLang() {

@@ -3,9 +3,41 @@ DeathInfo:
     DelayTicks: 20
     ShowTicks: 200
     
+InventoryProtection:
+    Enable: Yes
+    ItemRetainPercentage: 50
+    ExpRetainPercentage: 50
+    DeathGuardSystem:
+        Enable: Yes
+        GuardEntityType: PIG
+        KeepDroppedItems: Yes
+        KeepLostExp: Yes
+        ExpDeletePercentage: 20
+        ProtectSeconds: 900
+        Attack:
+            Enable: Yes
+            DamageToSecondFactor: 1
+            Notify: Yes
+            NotifySecondsInterval: 10
+            CanAttack:
+                Enemy: Yes
+                Neutral: Yes
+                Wilderness: No
+        Bless:
+            Enable: Yes
+            EachBlessSecondMax: 60
+            EachSecondCostExp: 0.6
+            Notify: Yes
+            CanBless:
+                SameFaction: Yes
+                Ally: Yes
+                Truce: Yes
+                Wilderness: No
+
 Translation:
     world: "Main world"
     
 System:
     # Change this to get you and this plugin eaten by Ender Dragon, not really, seriously.
+    FactionsSupport: Yes
     PluginVersion: ${version}

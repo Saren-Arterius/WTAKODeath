@@ -1,5 +1,7 @@
 package net.wtako.WTAKODeath.Commands;
 
+import net.wtako.WTAKODeath.Commands.Wdt.ArgClear;
+import net.wtako.WTAKODeath.Commands.Wdt.ArgGuards;
 import net.wtako.WTAKODeath.Commands.Wdt.ArgHelp;
 import net.wtako.WTAKODeath.Commands.Wdt.ArgOff;
 import net.wtako.WTAKODeath.Commands.Wdt.ArgReload;
@@ -25,6 +27,12 @@ public class CommandWdt implements CommandExecutor {
                 return true;
             } else if (args[0].equalsIgnoreCase("off")) {
                 new ArgOff(sender);
+                return true;
+            } else if (args[0].equalsIgnoreCase("guards") || args[0].equalsIgnoreCase("g")) {
+                new ArgGuards(sender);
+                return true;
+            } else if (args[0].equalsIgnoreCase("clear")) {
+                new ArgClear(sender);
                 return true;
             }
         }

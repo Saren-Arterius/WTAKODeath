@@ -6,8 +6,9 @@ author: ${author}
 website: ${url}
  
 main: ${groupId}.${artifactId}.${mainClass}
-database: true
 mainCommand: ${mainCommand}
+depend: [Citizens]
+softdepend: [mcore, Factions]
 
 commands:
     ${mainCommand}:
@@ -29,5 +30,29 @@ permissions:
         description: Reloads the plugin.
         default: op
     ${artifactId}.use:
-        description: Reloads the plugin.
+        description: Gives access to use this plugin.
+        default: true
+    ${artifactId}.basic:
+        description: Gives access to use most of the function of this plugin.
+        children:
+            ${artifactId}.canHaveDeathItemProtection: true
+            ${artifactId}.canHaveGuard: true
+            ${artifactId}.canAttackGuard: true
+            ${artifactId}.canBlessGuard: true
+            ${artifactId}.canHaveDeathInfo: true
+        default: true
+    ${artifactId}.canHaveDeathItemProtection:
+        description: Allows player to have death item protection.
+        default: true
+    ${artifactId}.canHaveGuard:
+        description: Allows player to have death guard.
+        default: true
+    ${artifactId}.canAttackGuard:
+        description: Allows player to attack death guard.
+        default: true
+    ${artifactId}.canBlessGuard:
+        description: Allows player to bless death guard.
+        default: true
+    ${artifactId}.canHaveDeathInfo:
+        description: Allows player to have death info display.
         default: true

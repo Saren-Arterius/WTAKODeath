@@ -23,10 +23,11 @@ public class PlayerDeathInfoListener implements Listener {
 
     @EventHandler
     public static void onPlayerDeath(final PlayerDeathEvent event) {
-        if (!Main.getInstance().getConfig().getBoolean("DeathInfo.Show")) {
+        final Player victim = event.getEntity();
+        if (!Main.getInstance().getConfig().getBoolean("DeathInfo.Show")
+                || !victim.hasPermission(Main.getInstance().getProperty("artifactId") + ".canHaveDeathInfo")) {
             return;
         }
-        final Player victim = event.getEntity();
         if (ScoreboardUtils.noShowScoreboardPlayers.contains(victim.getUniqueId())) {
             return;
         }
