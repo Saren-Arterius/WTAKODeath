@@ -129,9 +129,15 @@ public class PlayerDeathGuardListener implements Listener {
         final float expKept = manager.getCurrentExp() * (keepExpPercentage / 100F);
         final float expGuard = manager.getCurrentExp() * (guardExpPercentage / 100F);
 
-        event.getEntity().sendMessage(
-                MessageFormat.format(Lang.YOU_KEPT_ITEMS_LEVELS.toString(), keepAndDrop.get(0).size(),
-                        manager.getLevelForExp(Math.round(expKept))));
+        Main.getInstance().getServer().getScheduler().runTaskLater(Main.getInstance(), new Runnable() {
+            @Override
+            public void run() {
+                event.getEntity().sendMessage(
+                        MessageFormat.format(Lang.YOU_KEPT_ITEMS_LEVELS.toString(), keepAndDrop.get(0).size(),
+                                manager.getLevelForExp(Math.round(expKept))));
+
+            }
+        }, 8L);
 
         if (Main.getInstance().getConfig().getBoolean("InventoryProtection.EnableEXPLog")) {
             try {
@@ -150,8 +156,14 @@ public class PlayerDeathGuardListener implements Listener {
                 && event.getEntity().hasPermission(Main.getInstance().getProperty("artifactId") + ".canHaveGuard")) {
             final DeathGuard deathGuard = new DeathGuard(event.getEntity(), keepAndDrop.get(1), Math.round(expGuard));
             DeathGuard.getAllDeathGuards().add(deathGuard);
-            event.getEntity().sendMessage(MessageFormat.format(Lang.GUARD_SPAWN.toString(), deathGuard.toString()));
-            event.getEntity().sendMessage(Lang.HELP_GUARDS.toString());
+            Main.getInstance().getServer().getScheduler().runTaskLater(Main.getInstance(), new Runnable() {
+                @Override
+                public void run() {
+                    event.getEntity().sendMessage(
+                            MessageFormat.format(Lang.GUARD_SPAWN.toString(), deathGuard.toString()));
+                    event.getEntity().sendMessage(Lang.HELP_GUARDS.toString());
+                }
+            }, 10L);
             manager.setExp(expKept);
             event.getDrops().clear();
         } else {

@@ -23,8 +23,6 @@ permissions:
         default: op
     ${artifactId}.admin:
         description: Gives access to all ${name} administrative commands.
-        children:
-            ${artifactId}.reload: true
         default: op
     ${artifactId}.reload:
         description: Reloads the plugin.

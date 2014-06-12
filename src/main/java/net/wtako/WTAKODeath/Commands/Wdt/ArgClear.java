@@ -9,7 +9,7 @@ import org.bukkit.command.CommandSender;
 public class ArgClear {
 
     public ArgClear(CommandSender sender) {
-        if (sender.hasPermission(Main.getInstance().getProperty("artifactId") + ".admin")) {
+        if (!sender.hasPermission(Main.getInstance().getProperty("artifactId") + ".admin")) {
             sender.sendMessage(Lang.NO_PERMISSION_COMMAND.toString());
             return;
         }
