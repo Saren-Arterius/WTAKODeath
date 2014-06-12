@@ -36,6 +36,8 @@ public class DeathGuard implements Listener {
     private final NPC                    deathGuardNPC;
     private final BukkitRunnable         timer;
     private final HashMap<UUID, Integer> playerHits      = new HashMap<UUID, Integer>();
+    private boolean                      endOfLife       = false;
+    private double                       lastHealth;
     private long                         noNotifyUntil   = 0;
     private long                         noHitBackUntil  = 0;
     private String                       lastDamagerName = null;
@@ -56,13 +58,40 @@ public class DeathGuard implements Listener {
                 Main.getInstance().getConfig().getDouble("InventoryProtection.DeathGuardSystem.ProtectSeconds"));
         deathGuardNPC.getBukkitEntity().setHealth(
                 Main.getInstance().getConfig().getDouble("InventoryProtection.DeathGuardSystem.ProtectSeconds"));
+        lastHealth = deathGuardNPC.getBukkitEntity().getHealth();
         timer = new BukkitRunnable() {
             @Override
             public void run() {
-                if (!deathGuardNPC.isSpawned()) {
+                if (!deathGuardNPC.isSpawned() && endOfLife) {
                     timer.cancel();
+                } else if (!deathGuardNPC.isSpawned() && !endOfLife) {
+                    deathGuardNPC.spawn(deathGuardNPC.getStoredLocation());
+                    deathGuardNPC.getBukkitEntity().setMaxHealth(
+                            Main.getInstance().getConfig()
+                                    .getDouble("InventoryProtection.DeathGuardSystem.ProtectSeconds"));
+                    deathGuardNPC.getBukkitEntity().setHealth(lastHealth);
                 }
                 deathGuardNPC.getBukkitEntity().damage(1);
+                // AKA chunk is unloaded
+                if (lastHealth == deathGuardNPC.getBukkitEntity().getHealth()) {
+                    deathGuardNPC.getBukkitEntity().setHealth(lastHealth - 1);
+                    // Specially handle unloaded death guards
+                    if (deathGuardNPC.getBukkitEntity().getHealth() <= 0) {
+                        destroy();
+                        ArrayList<DeathGuard> needToRemove = new ArrayList<DeathGuard>();
+                        for (final DeathGuard deathGuard: DeathGuard.getAllDeathGuards()) {
+                            if (deathGuard.isEndOfLife()) {
+                                needToRemove.add(deathGuard);
+                            }
+                        }
+                        for (final DeathGuard deathGuard: needToRemove) {
+                            DeathGuard.getAllDeathGuards().remove(deathGuard);
+                        }
+                        needToRemove.clear();
+                        needToRemove = null;
+                    }
+                }
+                lastHealth = deathGuardNPC.getBukkitEntity().getHealth();
                 updateName();
             }
         };
@@ -233,6 +262,7 @@ public class DeathGuard implements Listener {
     private void cleanUp() {
         playerHits.clear();
         itemStacks.clear();
+        endOfLife = true;
     }
 
     public NPC getDeathGuardNPC() {
@@ -241,6 +271,10 @@ public class DeathGuard implements Listener {
 
     public Player getOwner() {
         return owner;
+    }
+
+    public boolean isEndOfLife() {
+        return endOfLife;
     }
 
     public static void killAllDeathGuards() {
