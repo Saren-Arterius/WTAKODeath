@@ -8,7 +8,7 @@ website: ${url}
 main: ${groupId}.${artifactId}.${mainClass}
 mainCommand: ${mainCommand}
 depend: [Citizens]
-softdepend: [mcore, Factions]
+softdepend: [mcore, Factions, WorldGuard]
 
 commands:
     ${mainCommand}:
@@ -31,15 +31,6 @@ permissions:
         default: op
     ${artifactId}.use:
         description: Gives access to use this plugin.
-        default: true
-    ${artifactId}.basic:
-        description: Gives access to use most of the function of this plugin.
-        children:
-            ${artifactId}.canHaveDeathItemProtection: true
-            ${artifactId}.canHaveGuard: true
-            ${artifactId}.canAttackGuard: true
-            ${artifactId}.canBlessGuard: true
-            ${artifactId}.canHaveDeathInfo: true
         default: true
     ${artifactId}.canHaveDeathItemProtection:
         description: Allows player to have death item protection.

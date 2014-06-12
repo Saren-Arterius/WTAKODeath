@@ -9,53 +9,86 @@ import net.wtako.WTAKODeath.Methods.DeathGuard;
 import net.wtako.WTAKODeath.Utils.FactionUtils;
 import net.wtako.WTAKODeath.Utils.Lang;
 
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 
 public class DeathGuardListener implements Listener {
 
     @EventHandler
     public static void onGuardGetDamage(NPCDamageByEntityEvent event) {
+        DeathGuard targetDeathGuard = null;
         for (final DeathGuard deathGuard: DeathGuard.getAllDeathGuards()) {
             if (event.getNPC() == deathGuard.getDeathGuardNPC()) {
-                if (!deathGuard.getDeathGuardNPC().isSpawned()) {
-                    return;
+                targetDeathGuard = deathGuard;
+                break;
+            }
+        }
+        if (!targetDeathGuard.getDeathGuardNPC().isSpawned()) {
+            return;
+        }
+        if (event.getDamager() == null || !(event.getDamager() instanceof Player)) {
+            event.setCancelled(true);
+            return;
+        }
+        final Player attacker = (Player) event.getDamager();
+        if (attacker == targetDeathGuard.getOwner()) {
+            event.setDamage(Integer.MAX_VALUE);
+            return;
+        }
+        if (!Main.getInstance().getConfig().getBoolean("System.FactionsSupport")) {
+            event.setCancelled(true);
+            return;
+        }
+        if (Main.getInstance().getConfig().getBoolean("InventoryProtection.DeathGuardSystem.Attack.Enable")
+                && attacker.hasPermission(Main.getInstance().getProperty("artifactId") + ".canAttackGuard")
+                && FactionUtils.canAttack(targetDeathGuard.getOwner(), attacker)) {
+            event.setDamage(((Long) Math.round(event.getDamage()
+                    * Main.getInstance().getConfig()
+                            .getDouble("InventoryProtection.DeathGuardSystem.Attack.DamageToSecondFactor"))).intValue());
+            targetDeathGuard.notifyAttack(attacker.getName());
+            targetDeathGuard.hitBack(attacker);
+            final DeathGuard taskTargetDeathGuard = targetDeathGuard;
+            Main.getInstance().getServer().getScheduler().runTaskLater(Main.getInstance(), new Runnable() {
+                @Override
+                public void run() {
+                    taskTargetDeathGuard.updateName();
                 }
-                if (event.getDamager() == null || !(event.getDamager() instanceof Player)) {
-                    event.setCancelled(true);
-                    return;
+            }, 1L);
+            targetDeathGuard.updateName();
+        } else if (Main.getInstance().getConfig().getBoolean("InventoryProtection.DeathGuardSystem.Bless.Enable")
+                && attacker.hasPermission(Main.getInstance().getProperty("artifactId") + ".canBlessGuard")
+                && FactionUtils.canBless(targetDeathGuard.getOwner(), attacker)) {
+            targetDeathGuard.blessBy(attacker);
+            event.setCancelled(true);
+        } else {
+            attacker.sendMessage(MessageFormat.format(Lang.GUARD_NO_ATTACK_NOR_BLESS.toString(), targetDeathGuard
+                    .getOwner().getName()));
+            event.setCancelled(true);
+        }
+
+    }
+
+    @SuppressWarnings("deprecation")
+    @EventHandler
+    public static void onGuardGetDamage(EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof LivingEntity)) {
+            return;
+        }
+        final LivingEntity livingEntity = (LivingEntity) event.getEntity();
+        for (final DeathGuard deathGuard: DeathGuard.getAllDeathGuards()) {
+            if (deathGuard.getDeathGuardNPC().getBukkitEntity() == livingEntity
+                    && !(event instanceof EntityDamageByEntityEvent)) {
+                event.setCancelled(true);
+                if (event.getCause() == DamageCause.SUFFOCATION) {
+                    livingEntity.teleport(livingEntity.getWorld().getHighestBlockAt(livingEntity.getLocation())
+                            .getLocation());
                 }
-                final Player attacker = (Player) event.getDamager();
-                if (attacker == deathGuard.getOwner()) {
-                    event.setDamage(Integer.MAX_VALUE);
-                    return;
-                }
-                if (!Main.getInstance().getConfig().getBoolean("System.FactionsSupport")) {
-                    event.setCancelled(true);
-                    return;
-                }
-                if (Main.getInstance().getConfig().getBoolean("InventoryProtection.DeathGuardSystem.Attack.Enable")
-                        && attacker.hasPermission(Main.getInstance().getProperty("artifactId") + ".canAttackGuard")
-                        && FactionUtils.canAttack(deathGuard.getOwner(), attacker)) {
-                    event.setDamage(((Long) Math.round(event.getDamage()
-                            * Main.getInstance().getConfig()
-                                    .getDouble("InventoryProtection.DeathGuardSystem.Attack.DamageToSecondFactor")))
-                            .intValue());
-                    if (Main.getInstance().getConfig().getBoolean("InventoryProtection.DeathGuardSystem.Attack.Notify")) {
-                        deathGuard.notifyAttack(attacker.getName());
-                    }
-                } else if (Main.getInstance().getConfig()
-                        .getBoolean("InventoryProtection.DeathGuardSystem.Bless.Enable")
-                        && attacker.hasPermission(Main.getInstance().getProperty("artifactId") + ".canBlessGuard")
-                        && FactionUtils.canBless(deathGuard.getOwner(), attacker)) {
-                    deathGuard.blessBy(attacker);
-                    event.setCancelled(true);
-                } else {
-                    attacker.sendMessage(MessageFormat.format(Lang.GUARD_NO_ATTACK_NOR_BLESS.toString(), deathGuard
-                            .getOwner().getName()));
-                    event.setCancelled(true);
-                }
+                return;
             }
         }
     }
@@ -63,23 +96,21 @@ public class DeathGuardListener implements Listener {
     @SuppressWarnings("deprecation")
     @EventHandler
     public static void onGuardDie(NPCDeathEvent event) {
-        DeathGuard attackedDeathGuard = null;
+        DeathGuard targetDeathGuard = null;
         for (final DeathGuard deathGuard: DeathGuard.getAllDeathGuards()) {
             if (event.getNPC() == deathGuard.getDeathGuardNPC()) {
-                attackedDeathGuard = deathGuard;
-                if (attackedDeathGuard.getDeathGuardNPC().getBukkitEntity().getKiller() == attackedDeathGuard
-                        .getOwner()) {
-                    attackedDeathGuard.giveBack();
-                } else {
-                    attackedDeathGuard.destroy();
-                }
-                event.getDrops().clear();
-                event.setDroppedExp(0);
-                break;
+                targetDeathGuard = deathGuard;
             }
         }
-        if (attackedDeathGuard != null) {
-            DeathGuard.getAllDeathGuards().remove(attackedDeathGuard);
+        if (targetDeathGuard != null) {
+            if (targetDeathGuard.getDeathGuardNPC().getBukkitEntity().getKiller() == targetDeathGuard.getOwner()) {
+                targetDeathGuard.giveBack();
+            } else {
+                targetDeathGuard.destroy();
+            }
+            event.getDrops().clear();
+            event.setDroppedExp(0);
+            DeathGuard.getAllDeathGuards().remove(targetDeathGuard);
         }
     }
 

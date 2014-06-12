@@ -1,6 +1,11 @@
 package net.wtako.WTAKODeath.Utils;
 
+import java.text.MessageFormat;
+
+import net.wtako.WTAKODeath.Main;
+
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 
 public class StringUtils {
 
@@ -16,4 +21,9 @@ public class StringUtils {
         return s.replaceAll("§", "");
     }
 
+    public static String locationToString(Location location) {
+        return MessageFormat.format(Lang.LOCATION_FORMAT.toString(),
+                Main.getHumanTranslation(location.getWorld().getName()), location.getBlockX(), location.getBlockY(),
+                location.getBlockZ());
+    }
 }

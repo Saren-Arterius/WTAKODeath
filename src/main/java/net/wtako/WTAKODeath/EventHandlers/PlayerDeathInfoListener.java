@@ -1,5 +1,8 @@
 package net.wtako.WTAKODeath.EventHandlers;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -24,6 +27,21 @@ public class PlayerDeathInfoListener implements Listener {
     @EventHandler
     public static void onPlayerDeath(final PlayerDeathEvent event) {
         final Player victim = event.getEntity();
+        PlayerDeathInfoListener.playerDeathTimes.put(victim.getUniqueId(), System.currentTimeMillis());
+        final String deathMessage = PlayerDeathInfoListener.getDeathScoreboardMessage(victim);
+        if (Main.getInstance().getConfig().getBoolean("DeathInfo.EnableLog")) {
+            try {
+                final FileWriter writer = new FileWriter(new File(Main.getInstance().getDataFolder(), "log.log"), true);
+                writer.append(MessageFormat.format(Lang.LOG_FORMAT_DEATH.toString() + "\r\n",
+                        new Date(System.currentTimeMillis()), event.getEntity().getName(),
+                        deathMessage.replaceAll("^%lb%", "").replaceAll("%lb%$", "").replaceAll("(%lb%)+", "%lb%")
+                                .replaceAll("%lb%", ", ")));
+                writer.close();
+            } catch (final IOException e) {
+                event.getEntity().sendMessage(MessageFormat.format(Lang.ERROR_HOOKING.toString(), "Logger"));
+                e.printStackTrace();
+            }
+        }
         if (!Main.getInstance().getConfig().getBoolean("DeathInfo.Show")
                 || !victim.hasPermission(Main.getInstance().getProperty("artifactId") + ".canHaveDeathInfo")) {
             return;
@@ -31,9 +49,6 @@ public class PlayerDeathInfoListener implements Listener {
         if (ScoreboardUtils.noShowScoreboardPlayers.contains(victim.getUniqueId())) {
             return;
         }
-        PlayerDeathInfoListener.playerDeathTimes.put(victim.getUniqueId(), System.currentTimeMillis());
-        final String deathMessage = PlayerDeathInfoListener.getDeathScoreboardMessage(victim);
-
         ScoreboardUtils.showScoreboardMessage(Lang.DEATH_INFO_TITLE.toString(), deathMessage,
                 Lang.DEATH_INFO_DELIMITER.toString(), victim,
                 Main.getInstance().getConfig().getLong("DeathInfo.DelayTicks"),

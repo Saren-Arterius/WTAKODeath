@@ -6,7 +6,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>WTAKODeath</name>
 	<description>WTAKO Death control plugin</description>
-	<url>https://gitlab.wtako.net/Saren/wtakoutils</url>
+	<url>https://gitlab.wtako.net/Saren/wtakodeath</url>
 
 	<properties>
 		<author>Saren</author>
@@ -23,6 +23,10 @@
 			<id>citizens-repo</id>
 			<url>http://repo.citizensnpcs.co</url>
 		</repository>
+		<repository>
+			<id>sk89q-repo</id>
+			<url>http://maven.sk89q.com/repo/</url>
+		</repository>
 	</repositories>
 
 	<dependencies>
@@ -36,6 +40,12 @@
 			<groupId>net.citizensnpcs</groupId>
 			<artifactId>citizensapi</artifactId>
 			<version>2.0.12-SNAPSHOT</version>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>com.sk89q</groupId>
+			<artifactId>worldguard</artifactId>
+			<version>LATEST</version>
 			<type>jar</type>
 		</dependency>
 	</dependencies>
