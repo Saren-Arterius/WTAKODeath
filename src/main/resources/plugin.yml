@@ -1,0 +1,33 @@
+name: ${name}
+artifactId: ${artifactId}
+version: ${version}
+description: ${description}
+author: ${author}
+website: ${url}
+ 
+main: ${groupId}.${artifactId}.${mainClass}
+database: true
+mainCommand: ${mainCommand}
+
+commands:
+    ${mainCommand}:
+        description: Basic command.
+        usage: Type /<command> help to get help.
+        permission: ${artifactId}.use
+        permission-message: You are not permitted to use this plugin.
+
+permissions:
+    ${artifactId}.*:
+        description: Gives access to all ${name} commands.
+        default: op
+    ${artifactId}.admin:
+        description: Gives access to all ${name} administrative commands.
+        children:
+            ${artifactId}.reload: true
+        default: op
+    ${artifactId}.reload:
+        description: Reloads the plugin.
+        default: op
+    ${artifactId}.use:
+        description: Reloads the plugin.
+        default: true

@@ -1,0 +1,11 @@
+DeathInfo:
+    Show: Yes
+    DelayTicks: 20
+    ShowTicks: 200
+    
+Translation:
+    world: "Main world"
+    
+System:
+    # Change this to get you and this plugin eaten by Ender Dragon, not really, seriously.
+    PluginVersion: ${version}
