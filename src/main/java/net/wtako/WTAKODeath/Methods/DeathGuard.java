@@ -103,7 +103,7 @@ public class DeathGuard implements Listener {
     @SuppressWarnings("deprecation")
     public String toString() {
         return MessageFormat.format(Lang.GUARD_TO_STRING.toString(), getOwner() != null ? getOwner().getName()
-                : storedOwnerName != null ? storedOwnerName : ownerID, StringUtils.locationToString(deathGuardNPC
+                : storedOwnerName != null ? storedOwnerName : "", StringUtils.locationToString(deathGuardNPC
                 .getStoredLocation()), deathGuardNPC.isSpawned() ? deathGuardNPC.getBukkitEntity().getHealth() : 0);
     }
 
@@ -113,8 +113,8 @@ public class DeathGuard implements Listener {
             return;
         }
         deathGuardNPC.setName(MessageFormat.format(Lang.GUARD_NAME_FORMAT.toString(), getOwner() != null ? getOwner()
-                .getName() : storedOwnerName != null ? storedOwnerName : ownerID, Math.round(deathGuardNPC
-                .getBukkitEntity().getHealth()),
+                .getName() : storedOwnerName != null ? storedOwnerName : "", Math.round(deathGuardNPC.getBukkitEntity()
+                .getHealth()),
                 Main.getInstance().getConfig().getInt("InventoryProtection.DeathGuardSystem.ProtectSeconds")));
     }
 
@@ -288,7 +288,7 @@ public class DeathGuard implements Listener {
     public static void killAllDeathGuards() {
         for (final DeathGuard deathGuard: DeathGuard.getAllDeathGuards()) {
             if (deathGuard.getDeathGuardNPC().isSpawned()) {
-                if (deathGuard.getOwner().isOnline()) {
+                if (deathGuard.getOwner() != null && deathGuard.getOwner().isOnline()) {
                     deathGuard.giveBack();
                 } else {
                     deathGuard.destroy();
