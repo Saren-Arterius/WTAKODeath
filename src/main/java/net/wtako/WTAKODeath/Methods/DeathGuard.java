@@ -297,16 +297,21 @@ public class DeathGuard implements Listener {
     }
 
     public static void killAllDeathGuards() {
+        final ArrayList<DeathGuard> needToKill = new ArrayList<DeathGuard>();
         for (final DeathGuard deathGuard: DeathGuard.getAllDeathGuards()) {
             if (deathGuard.getDeathGuardNPC().isSpawned()) {
-                if (deathGuard.getOwner() != null && deathGuard.getOwner().isOnline()) {
-                    deathGuard.giveBack();
-                } else {
-                    deathGuard.destroy();
-                }
+                needToKill.add(deathGuard);
+            }
+        }
+        for (final DeathGuard killDeathGuard: needToKill) {
+            if (killDeathGuard.getOwner() != null && killDeathGuard.getOwner().isOnline()) {
+                killDeathGuard.giveBack();
+            } else {
+                killDeathGuard.destroy();
             }
         }
         DeathGuard.getAllDeathGuards().clear();
+        needToKill.clear();
     }
 
     public static ArrayList<DeathGuard> getAllDeathGuards() {
