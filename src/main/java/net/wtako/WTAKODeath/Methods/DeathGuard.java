@@ -55,7 +55,6 @@ public class DeathGuard implements Listener {
                 EntityType.valueOf(Main.getInstance().getConfig()
                         .getString("InventoryProtection.DeathGuardSystem.GuardEntityType").toUpperCase()),
                 "Death Guard");
-        deathGuardNPC.setProtected(false);
         lastStoredLocation = owner.getLocation();
         deathGuardNPC.spawn(lastStoredLocation);
         tryToSpawnEntity();
@@ -72,28 +71,30 @@ public class DeathGuard implements Listener {
                 }
                 if (deathGuardNPC.isSpawned()) {
                     deathGuardNPC.getBukkitEntity().damage(1);
-                    // AKA chunk is unloaded
-                    if (lastHealth == deathGuardNPC.getBukkitEntity().getHealth()) {
-                        deathGuardNPC.getBukkitEntity().setHealth(lastHealth - 1 < 0 ? 0 : lastHealth - 1);
-                        // Specially handle unloaded death guards
-                        if (deathGuardNPC.getBukkitEntity().getHealth() <= 0) {
-                            destroy();
-                            ArrayList<DeathGuard> needToRemove = new ArrayList<DeathGuard>();
-                            for (final DeathGuard deathGuard: DeathGuard.getAllDeathGuards()) {
-                                if (deathGuard.isEndOfLife()) {
-                                    needToRemove.add(deathGuard);
-                                }
-                            }
-                            for (final DeathGuard deathGuard: needToRemove) {
-                                DeathGuard.getAllDeathGuards().remove(deathGuard);
-                            }
-                            needToRemove.clear();
-                            needToRemove = null;
-                        }
-                    }
-                    lastHealth = deathGuardNPC.getBukkitEntity().getHealth();
-                    updateName();
                 }
+                // AKA chunk is unloaded
+                if (lastHealth == deathGuardNPC.getBukkitEntity().getHealth()) {
+                    deathGuardNPC.getBukkitEntity().setHealth(lastHealth - 1 < 0 ? 0 : lastHealth - 1);
+                    // Specially handle unloaded death guards
+                    if (deathGuardNPC.getBukkitEntity().getHealth() <= 0) {
+                        destroy();
+                        ArrayList<DeathGuard> needToRemove = new ArrayList<DeathGuard>();
+                        for (final DeathGuard deathGuard: DeathGuard.getAllDeathGuards()) {
+                            if (deathGuard.isEndOfLife()) {
+                                needToRemove.add(deathGuard);
+                            }
+                        }
+                        for (final DeathGuard deathGuard: needToRemove) {
+                            DeathGuard.getAllDeathGuards().remove(deathGuard);
+                        }
+                        needToRemove.clear();
+                        needToRemove = null;
+                        return;
+                    }
+                }
+                lastHealth = deathGuardNPC.getBukkitEntity().getHealth();
+                lastStoredLocation = deathGuardNPC.getBukkitEntity().getLocation();
+                updateName();
             }
         };
         timer.runTaskTimer(Main.getInstance(), 0L, 20L);
@@ -109,11 +110,18 @@ public class DeathGuard implements Listener {
 
     @SuppressWarnings("deprecation")
     public void tryToSpawnEntity() {
+        deathGuardNPC.setProtected(true);
         deathGuardNPC.spawn(lastStoredLocation);
         if (deathGuardNPC.isSpawned()) {
             deathGuardNPC.getBukkitEntity().setMaxHealth(
                     Main.getInstance().getConfig().getDouble("InventoryProtection.DeathGuardSystem.ProtectSeconds"));
             deathGuardNPC.getBukkitEntity().setHealth(lastHealth);
+            Main.getInstance().getServer().getScheduler().runTaskLater(Main.getInstance(), new Runnable() {
+                @Override
+                public void run() {
+                    deathGuardNPC.setProtected(false);
+                }
+            }, 20L);
         }
     }
 

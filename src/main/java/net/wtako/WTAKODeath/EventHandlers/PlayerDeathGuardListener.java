@@ -7,6 +7,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import net.wtako.WTAKODeath.Main;
@@ -17,6 +18,7 @@ import net.wtako.WTAKODeath.Utils.Lang;
 import net.wtako.WTAKODeath.Utils.StringUtils;
 
 import org.bukkit.GameMode;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -153,6 +155,7 @@ public class PlayerDeathGuardListener implements Listener {
         }
 
         PlayerDeathGuardListener.returnItemsOnRespawn.put(event.getEntity().getUniqueId(), keepAndDrop.get(0));
+
         final int keepExpPercentage = PlayerDeathGuardListener.getPercentage(Main.getInstance().getConfig()
                 .getInt("InventoryProtection.ExpRetainPercentage"));
         final int deleteExpPercentage = PlayerDeathGuardListener.getPercentage(Main.getInstance().getConfig()
@@ -208,16 +211,12 @@ public class PlayerDeathGuardListener implements Listener {
                             event.getEntity().sendMessage(Lang.HELP_GUARDS.toString());
                         }
                     }, 10L);
-            manager.setExp(expKept);
-            event.getEntity().getInventory().clear();
             event.getDrops().clear();
+            manager.setExp(expKept);
         } else {
-            manager.setExp(expKept);
-            event.getEntity().getInventory().clear();
-            for (final ItemStack itemStack: keepAndDrop.get(1)) {
-                event.getEntity().getWorld().dropItemNaturally(event.getEntity().getLocation(), itemStack);
-            }
             event.getDrops().clear();
+            event.getDrops().addAll(keepAndDrop.get(1));
+            manager.setExp(expKept);
         }
     }
 
@@ -246,6 +245,18 @@ public class PlayerDeathGuardListener implements Listener {
         number = number > 100 ? 100 : number;
         number = number < 0 ? 0 : number;
         return number;
+    }
+
+    public static void returnAllItemsNow() {
+        for (final Entry<UUID, ArrayList<ItemStack>> entry: PlayerDeathGuardListener.returnItemsOnRespawn.entrySet()) {
+            final Player player = Main.getInstance().getServer().getPlayer(entry.getKey());
+            if (player != null) {
+                for (final ItemStack itemStack: entry.getValue()) {
+                    ItemStackUtils.giveToPlayerOrDrop(itemStack, player, player.getLocation());
+                }
+            }
+        }
+        PlayerDeathGuardListener.returnItemsOnRespawn.clear();
     }
 
 }
