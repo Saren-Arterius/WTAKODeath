@@ -209,13 +209,15 @@ public class PlayerDeathGuardListener implements Listener {
                         }
                     }, 10L);
             manager.setExp(expKept);
+            event.getEntity().getInventory().clear();
             event.getDrops().clear();
         } else {
             manager.setExp(expKept);
-            event.getDrops().clear();
+            event.getEntity().getInventory().clear();
             for (final ItemStack itemStack: keepAndDrop.get(1)) {
-                event.getDrops().add(itemStack);
+                event.getEntity().getWorld().dropItemNaturally(event.getEntity().getLocation(), itemStack);
             }
+            event.getDrops().clear();
         }
     }
 

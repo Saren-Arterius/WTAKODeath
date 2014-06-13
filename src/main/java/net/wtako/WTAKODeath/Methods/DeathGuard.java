@@ -148,6 +148,7 @@ public class DeathGuard implements Listener {
         }
         manager.changeExp(-expCost);
         guardEntity.setHealth(guardEntity.getHealth() + blessSecond);
+        lastHealth += blessSecond;
         blesser.sendMessage(MessageFormat.format(Lang.GUARD_BLESSED.toString(), getOwner().getName(),
                 Math.round(blessSecond)));
         if (Main.getInstance().getConfig().getBoolean("InventoryProtection.DeathGuardSystem.Bless.Notify")
