@@ -8,6 +8,7 @@ InventoryProtection:
     Enable: Yes
     EnableItemLog: Yes
     EnableEXPLog: Yes
+    ThrottleSeconds: 10
     ItemRetainPercentage: 50
     ExpRetainPercentage: 50
     DeathGuardSystem:

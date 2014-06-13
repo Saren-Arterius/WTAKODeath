@@ -28,20 +28,31 @@ public class PlayerDeathInfoListener implements Listener {
     public static void onPlayerDeath(final PlayerDeathEvent event) {
         final Player victim = event.getEntity();
         PlayerDeathInfoListener.playerDeathTimes.put(victim.getUniqueId(), System.currentTimeMillis());
-        final String deathMessage = PlayerDeathInfoListener.getDeathScoreboardMessage(victim);
         if (Main.getInstance().getConfig().getBoolean("DeathInfo.EnableLog")) {
-            try {
-                final FileWriter writer = new FileWriter(new File(Main.getInstance().getDataFolder(), "log.log"), true);
-                writer.append(MessageFormat.format(Lang.LOG_FORMAT_DEATH.toString() + "\r\n",
-                        new Date(System.currentTimeMillis()), event.getEntity().getName(),
-                        deathMessage.replaceAll("^%lb%", "").replaceAll("%lb%$", "").replaceAll("(%lb%)+", "%lb%")
-                                .replaceAll("%lb%", ", ")));
-                writer.close();
-            } catch (final IOException e) {
-                event.getEntity().sendMessage(MessageFormat.format(Lang.ERROR_HOOKING.toString(), "Logger"));
-                e.printStackTrace();
-            }
+            Main.getInstance().getServer().getScheduler()
+                    .runTaskLaterAsynchronously(Main.getInstance(), new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                final FileWriter writer = new FileWriter(new File(Main.getInstance().getDataFolder(),
+                                        "log.log"), true);
+                                writer.append(MessageFormat.format(
+                                        Lang.LOG_FORMAT_DEATH.toString() + "\r\n",
+                                        new Date(System.currentTimeMillis()),
+                                        event.getEntity().getName(),
+                                        PlayerDeathInfoListener.getDeathScoreboardMessage(victim, false)
+                                                .replaceAll("(%lb%)+", "%lb%").replaceAll("^%lb%", "")
+                                                .replaceAll("%lb%$", "").replaceAll("%lb%", ", ")));
+                                writer.close();
+                            } catch (final IOException e) {
+                                event.getEntity().sendMessage(
+                                        MessageFormat.format(Lang.ERROR_HOOKING.toString(), "Logger"));
+                                e.printStackTrace();
+                            }
+                        }
+                    }, 1L);
         }
+
         if (!Main.getInstance().getConfig().getBoolean("DeathInfo.Show")
                 || !victim.hasPermission(Main.getInstance().getProperty("artifactId") + ".canHaveDeathInfo")) {
             return;
@@ -49,6 +60,7 @@ public class PlayerDeathInfoListener implements Listener {
         if (ScoreboardUtils.noShowScoreboardPlayers.contains(victim.getUniqueId())) {
             return;
         }
+        final String deathMessage = PlayerDeathInfoListener.getDeathScoreboardMessage(victim, true);
         ScoreboardUtils.showScoreboardMessage(Lang.DEATH_INFO_TITLE.toString(), deathMessage,
                 Lang.DEATH_INFO_DELIMITER.toString(), victim,
                 Main.getInstance().getConfig().getLong("DeathInfo.DelayTicks"),
@@ -70,14 +82,14 @@ public class PlayerDeathInfoListener implements Listener {
         final Long millisReduction = System.currentTimeMillis()
                 - PlayerDeathInfoListener.playerDeathTimes.get(victim.getUniqueId());
         final Long ticksReduction = millisReduction / 50L;
-        final String deathMessage = PlayerDeathInfoListener.getDeathScoreboardMessage(victim);
+        final String deathMessage = PlayerDeathInfoListener.getDeathScoreboardMessage(victim, true);
         ScoreboardUtils.showScoreboardMessage(Lang.DEATH_INFO_TITLE.toString(), deathMessage,
                 Lang.DEATH_INFO_DELIMITER.toString(), victim,
                 Main.getInstance().getConfig().getLong("DeathInfo.DelayTicks"),
                 Main.getInstance().getConfig().getLong("DeathInfo.ShowTicks") - ticksReduction);
     }
 
-    public static String getDeathScoreboardMessage(Player victim) {
+    public static String getDeathScoreboardMessage(Player victim, boolean extraMessage) {
         final String locationMsg = MessageFormat.format(Lang.DEATH_INFO_LOCATION_FORMAT.toString(),
                 Main.getHumanTranslation(victim.getLocation().getWorld().getName()), victim.getLocation().getBlockX(),
                 victim.getLocation().getBlockY(), victim.getLocation().getBlockZ())
@@ -106,7 +118,7 @@ public class PlayerDeathInfoListener implements Listener {
                     + Lang.DEATH_INFO_DELIMITER.toString();
         }
         final String deathMessage = MessageFormat.format(Lang.DEATH_INFO_FORMAT.toString(), locationMsg, killerMsg,
-                timeMsg, causeMsg, Lang.DEATH_INFO_EXTRA_MSG.toString());
+                timeMsg, causeMsg, extraMessage ? Lang.DEATH_INFO_EXTRA_MSG.toString() : "");
         return deathMessage;
     }
 }

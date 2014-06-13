@@ -28,6 +28,9 @@ public class DeathGuardListener implements Listener {
                 break;
             }
         }
+        if (targetDeathGuard == null) {
+            return;
+        }
         if (!targetDeathGuard.getDeathGuardNPC().isSpawned()) {
             return;
         }
@@ -85,8 +88,7 @@ public class DeathGuardListener implements Listener {
                     && !(event instanceof EntityDamageByEntityEvent)) {
                 event.setCancelled(true);
                 if (event.getCause() == DamageCause.SUFFOCATION) {
-                    livingEntity.teleport(livingEntity.getWorld().getHighestBlockAt(livingEntity.getLocation())
-                            .getLocation());
+                    livingEntity.teleport(livingEntity.getLocation().add(1, 1, 1));
                 }
                 return;
             }
