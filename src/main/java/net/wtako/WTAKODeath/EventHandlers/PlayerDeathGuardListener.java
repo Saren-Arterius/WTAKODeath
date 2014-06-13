@@ -41,15 +41,15 @@ public class PlayerDeathGuardListener implements Listener {
         if (event.getEntity().getGameMode() == GameMode.CREATIVE) {
             return;
         }
+        boolean worldGuardAllows = true;
         if (PlayerDeathGuardListener.deathThrottle.containsKey(event.getEntity().getUniqueId())
                 && PlayerDeathGuardListener.deathThrottle.get(event.getEntity().getUniqueId()) > System
                         .currentTimeMillis()) {
-            return;
+            worldGuardAllows = false;
         } else {
             PlayerDeathGuardListener.deathThrottle.put(event.getEntity().getUniqueId(), System.currentTimeMillis()
                     + Main.getInstance().getConfig().getLong("InventoryProtection.ThrottleSeconds") * 1000);
         }
-        boolean worldGuardAllows = true;
         if (Main.getInstance().getConfig().getBoolean("System.WorldGuardSupport")) {
             try {
                 final WorldGuardPlugin worldGuard = PlayerDeathGuardListener.getWorldGuard();
@@ -160,8 +160,9 @@ public class PlayerDeathGuardListener implements Listener {
         final int guardExpPercentage = PlayerDeathGuardListener.getPercentage(100 - keepExpPercentage
                 - deleteExpPercentage);
 
-        final float expKept = manager.getCurrentExp() * (keepExpPercentage / 100F);
-        final float expGuard = manager.getCurrentExp() * (guardExpPercentage / 100F);
+        final float expBeforeDeath = manager.getCurrentExp() * (keepExpPercentage / 100F);
+        final float expKept = expBeforeDeath * (keepExpPercentage / 100F);
+        final float expGuard = expBeforeDeath * (guardExpPercentage / 100F);
 
         Main.getInstance().getServer().getScheduler().runTaskLaterAsynchronously(Main.getInstance(), new Runnable() {
             @Override
@@ -183,7 +184,7 @@ public class PlayerDeathGuardListener implements Listener {
                                 writer.append(MessageFormat.format(
                                         Lang.LOG_FORMAT_EXP_KEPT_GUARDED.toString() + "\r\n",
                                         new Date(System.currentTimeMillis()), event.getEntity().getName(), expKept,
-                                        expGuard, manager.getCurrentExp()));
+                                        expGuard, expBeforeDeath));
                                 writer.close();
                             } catch (final IOException e) {
                                 event.getEntity().sendMessage(

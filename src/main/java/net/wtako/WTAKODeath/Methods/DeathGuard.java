@@ -55,11 +55,13 @@ public class DeathGuard implements Listener {
                 "Death Guard");
         deathGuardNPC.setProtected(false);
         deathGuardNPC.spawn(owner.getLocation());
-        deathGuardNPC.getBukkitEntity().setMaxHealth(
-                Main.getInstance().getConfig().getDouble("InventoryProtection.DeathGuardSystem.ProtectSeconds"));
-        deathGuardNPC.getBukkitEntity().setHealth(
-                Main.getInstance().getConfig().getDouble("InventoryProtection.DeathGuardSystem.ProtectSeconds"));
-        lastHealth = deathGuardNPC.getBukkitEntity().getHealth();
+        if (deathGuardNPC.isSpawned()) {
+            deathGuardNPC.getBukkitEntity().setMaxHealth(
+                    Main.getInstance().getConfig().getDouble("InventoryProtection.DeathGuardSystem.ProtectSeconds"));
+            deathGuardNPC.getBukkitEntity().setHealth(
+                    Main.getInstance().getConfig().getDouble("InventoryProtection.DeathGuardSystem.ProtectSeconds"));
+        }
+        lastHealth = Main.getInstance().getConfig().getDouble("InventoryProtection.DeathGuardSystem.ProtectSeconds");
         timer = new BukkitRunnable() {
             @Override
             public void run() {

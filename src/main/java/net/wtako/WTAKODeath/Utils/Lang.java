@@ -43,6 +43,7 @@ public enum Lang {
 
     ALL_GUARDS_KILLED("all-guards-killed", "&aSuccessfully killed all death guards."),
     YOU_DONT_HAVE_GUARDS("you-dont-have-guards", "&eYou do not have any death guards."),
+    NO_GUARDS("no-guards", "&eCurrently there is no guard in this server."),
     YOU_KEPT_ITEMS_LEVELS(
             "you-kept-items-exp",
             "&e{0} item(s) and {1} level(s) are kept. Items will be returned to you upon your respawn."),
@@ -52,6 +53,8 @@ public enum Lang {
             + " off&f to remove the display board."),
     HELP_TSH("help-tsh", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
             + " tsh&f to toggle death info showing on death."),
+    HELP_ALL_GUARDS("help-all-guards", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
+            + " allguards&f to list all the death guards. &c(OP only)"),
     HELP_CLEAR("help-clear", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
             + " clear&f to kill (Give back or drop if owner offline) all the death guards. &c(OP only)"),
     HELP_RELOAD("help-reload", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
