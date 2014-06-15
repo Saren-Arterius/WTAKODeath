@@ -104,7 +104,7 @@ public class DeathGuard implements Listener {
     @SuppressWarnings("deprecation")
     public String toString() {
         return MessageFormat.format(Lang.GUARD_TO_STRING.toString(), getOwner() != null ? getOwner().getName()
-                : storedOwnerName != null ? storedOwnerName : "", StringUtils.locationToString(deathGuardNPC
+                : storedOwnerName != null ? storedOwnerName : "<OFFLINE>", StringUtils.locationToString(deathGuardNPC
                 .getStoredLocation()), deathGuardNPC.isSpawned() ? deathGuardNPC.getBukkitEntity().getHealth() : 0);
     }
 
