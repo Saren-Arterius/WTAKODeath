@@ -40,7 +40,7 @@ public enum Lang {
     GUARD_UNDER_ATTACK("guard-under-attack", "&cYour {0} is under attack! (Attacker: {1})"),
     GUARD_NOT_ENOUGH_EXP_BLESS("guard-not-enough-exp-bless", "&eYou do not have enough exp to bless {0}''s Guard."),
     GUARD_HIT_YOU_BACK("guard-hit-you-back", "&e{0}''s Guard hit you back with its wrath!"),
-
+    OFFLINE_PLAYER("offline-player", "Offline player"),
     ALL_GUARDS_KILLED("all-guards-killed", "&aSuccessfully killed all death guards."),
     YOU_DONT_HAVE_GUARDS("you-dont-have-guards", "&eYou do not have any death guards."),
     NO_GUARDS("no-guards", "&eCurrently there is no guard in this server."),

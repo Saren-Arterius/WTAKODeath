@@ -1,7 +1,6 @@
 package net.wtako.WTAKODeath.Utils;
 
 import java.text.MessageFormat;
-
 import net.wtako.WTAKODeath.Main;
 
 import org.bukkit.entity.Player;
@@ -16,6 +15,9 @@ public class FactionUtils {
         try {
             if (!Main.getInstance().getConfig().getBoolean("InventoryProtection.DeathGuardSystem.Attack.Enable")) {
                 return false;
+            }
+            if (victim == null) {
+                return true;
             }
             if (!UPlayer.get(attacker).hasFaction() || !UPlayer.get(victim).hasFaction()) {
                 return Main.getInstance().getConfig()
@@ -45,6 +47,9 @@ public class FactionUtils {
     public static boolean canBless(Player blessee, Player blesser) {
         try {
             if (!Main.getInstance().getConfig().getBoolean("InventoryProtection.DeathGuardSystem.Bless.Enable")) {
+                return false;
+            }
+            if (blessee == null) {
                 return false;
             }
             if (!UPlayer.get(blesser).hasFaction() || !UPlayer.get(blessee).hasFaction()) {

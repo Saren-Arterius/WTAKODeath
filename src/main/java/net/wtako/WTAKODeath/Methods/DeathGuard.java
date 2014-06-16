@@ -66,7 +66,7 @@ public class DeathGuard implements Listener {
                     timer.cancel();
                     return;
                 }
-                if (!endOfLife) {
+                if (!endOfLife && !deathGuardNPC.isSpawned()) {
                     tryToSpawnEntity();
                 }
                 if (deathGuardNPC.isSpawned()) {
@@ -94,6 +94,7 @@ public class DeathGuard implements Listener {
                 }
                 lastHealth = deathGuardNPC.getBukkitEntity().getHealth();
                 lastStoredLocation = deathGuardNPC.getBukkitEntity().getLocation();
+                storedOwnerName = getOwner() != null ? getOwner().getName() : storedOwnerName;
                 updateName();
             }
         };
@@ -103,9 +104,9 @@ public class DeathGuard implements Listener {
     @Override
     @SuppressWarnings("deprecation")
     public String toString() {
-        return MessageFormat.format(Lang.GUARD_TO_STRING.toString(), getOwner() != null ? getOwner().getName()
-                : storedOwnerName != null ? storedOwnerName : "<OFFLINE>", StringUtils.locationToString(deathGuardNPC
-                .getStoredLocation()), deathGuardNPC.isSpawned() ? deathGuardNPC.getBukkitEntity().getHealth() : 0);
+        return MessageFormat.format(Lang.GUARD_TO_STRING.toString(), getOwnerName(), StringUtils
+                .locationToString(deathGuardNPC.getStoredLocation()), deathGuardNPC.isSpawned() ? deathGuardNPC
+                .getBukkitEntity().getHealth() : 0);
     }
 
     @SuppressWarnings("deprecation")
@@ -130,9 +131,8 @@ public class DeathGuard implements Listener {
         if (!deathGuardNPC.isSpawned()) {
             return;
         }
-        deathGuardNPC.setName(MessageFormat.format(Lang.GUARD_NAME_FORMAT.toString(), getOwner() != null ? getOwner()
-                .getName() : storedOwnerName != null ? storedOwnerName : "", Math.round(deathGuardNPC.getBukkitEntity()
-                .getHealth()),
+        deathGuardNPC.setName(MessageFormat.format(Lang.GUARD_NAME_FORMAT.toString(), getOwnerName(),
+                Math.round(deathGuardNPC.getBukkitEntity().getHealth()),
                 Main.getInstance().getConfig().getInt("InventoryProtection.DeathGuardSystem.ProtectSeconds")));
     }
 
@@ -151,14 +151,13 @@ public class DeathGuard implements Listener {
                 * blessSecond;
         final ExperienceManager manager = new ExperienceManager(blesser);
         if (!manager.hasExp(expCost)) {
-            blesser.sendMessage(MessageFormat.format(Lang.GUARD_NOT_ENOUGH_EXP_BLESS.toString(), getOwner().getName()));
+            blesser.sendMessage(MessageFormat.format(Lang.GUARD_NOT_ENOUGH_EXP_BLESS.toString(), getOwnerName()));
             return;
         }
         manager.changeExp(-expCost);
         guardEntity.setHealth(guardEntity.getHealth() + blessSecond);
         lastHealth += blessSecond;
-        blesser.sendMessage(MessageFormat.format(Lang.GUARD_BLESSED.toString(), getOwner().getName(),
-                Math.round(blessSecond)));
+        blesser.sendMessage(MessageFormat.format(Lang.GUARD_BLESSED.toString(), getOwnerName(), Math.round(blessSecond)));
         if (Main.getInstance().getConfig().getBoolean("InventoryProtection.DeathGuardSystem.Bless.Notify")
                 && getOwner() != null) {
             getOwner()
@@ -209,7 +208,7 @@ public class DeathGuard implements Listener {
                 attacker.setFireTicks(Main.getInstance().getConfig()
                         .getInt("InventoryProtection.DeathGuardSystem.Attack.HitBack.FireTicks"));
             }
-            attacker.sendMessage(MessageFormat.format(Lang.GUARD_HIT_YOU_BACK.toString(), getOwner().getName()));
+            attacker.sendMessage(MessageFormat.format(Lang.GUARD_HIT_YOU_BACK.toString(), getOwnerName()));
             noHitBackUntil = System.currentTimeMillis() + millisInterval;
         }
 
@@ -217,6 +216,9 @@ public class DeathGuard implements Listener {
 
     @SuppressWarnings("deprecation")
     public void giveBack() {
+        if (!isValid()) {
+            return;
+        }
         if (Main.getInstance().getConfig().getBoolean("InventoryProtection.DeathGuardSystem.KeepDroppedItems")) {
             for (final ItemStack itemStack: itemStacks) {
                 ItemStackUtils.giveToPlayerOrDrop(itemStack, getOwner(), getOwner().getLocation());
@@ -250,6 +252,9 @@ public class DeathGuard implements Listener {
 
     @SuppressWarnings("deprecation")
     public void destroy() {
+        if (!isValid()) {
+            return;
+        }
         final World world = deathGuardNPC.getStoredLocation().getWorld();
         if (Main.getInstance().getConfig().getBoolean("InventoryProtection.DeathGuardSystem.KeepDroppedItems")) {
             for (final ItemStack itemStack: itemStacks) {
@@ -300,8 +305,23 @@ public class DeathGuard implements Listener {
         return Main.getInstance().getServer().getPlayer(ownerID);
     }
 
+    public String getOwnerName() {
+        return getOwner() != null ? getOwner().getName() : storedOwnerName != null ? storedOwnerName
+                : Lang.OFFLINE_PLAYER.toString();
+    }
+
     public boolean isEndOfLife() {
         return endOfLife;
+    }
+
+    public boolean isValid() {
+        if (endOfLife) {
+            return false;
+        }
+        if (itemStacks == null) {
+            return false;
+        }
+        return true;
     }
 
     public static void killAllDeathGuards() {

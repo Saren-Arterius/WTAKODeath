@@ -50,9 +50,10 @@ public class DeathGuardListener implements Listener {
         if (Main.getInstance().getConfig().getBoolean("InventoryProtection.DeathGuardSystem.Attack.Enable")
                 && attacker.hasPermission(Main.getInstance().getProperty("artifactId") + ".canAttackGuard")
                 && FactionUtils.canAttack(targetDeathGuard.getOwner(), attacker)) {
-            event.setDamage(((Long) Math.round(event.getDamage()
+            int damage = ((Long) Math.round(event.getDamage()
                     * Main.getInstance().getConfig()
-                            .getDouble("InventoryProtection.DeathGuardSystem.Attack.DamageToSecondFactor"))).intValue());
+                            .getDouble("InventoryProtection.DeathGuardSystem.Attack.DamageToSecondFactor"))).intValue();
+            event.setDamage(damage);
             targetDeathGuard.notifyAttack(attacker.getName());
             targetDeathGuard.hitBack(attacker);
             final DeathGuard taskTargetDeathGuard = targetDeathGuard;
