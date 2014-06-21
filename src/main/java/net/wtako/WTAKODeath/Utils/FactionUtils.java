@@ -1,6 +1,7 @@
 package net.wtako.WTAKODeath.Utils;
 
 import java.text.MessageFormat;
+
 import net.wtako.WTAKODeath.Main;
 
 import org.bukkit.entity.Player;

@@ -47,12 +47,15 @@ public enum Lang {
     YOU_KEPT_ITEMS_LEVELS(
             "you-kept-items-exp",
             "&e{0} item(s) and {1} level(s) are kept. Items will be returned to you upon your respawn."),
-    HELP_GUARDS("help-guards", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
-            + " guards&f to view all of your death guards."),
+
     HELP_OFF("help-off", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
             + " off&f to remove the display board."),
     HELP_TSH("help-tsh", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
             + " tsh&f to toggle death info showing on death."),
+    HELP_GUARDS("help-guards", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
+            + " guards&f to view all of your death guards."),
+    HELP_DIE("help-die", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
+            + " die&f to kill all of your death guards."),
     HELP_ALL_GUARDS("help-all-guards", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
             + " allguards&f to list all the death guards. &c(OP only)"),
     HELP_CLEAR("help-clear", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
