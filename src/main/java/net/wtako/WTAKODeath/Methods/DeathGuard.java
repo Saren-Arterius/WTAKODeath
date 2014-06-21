@@ -56,27 +56,34 @@ public class DeathGuard implements Listener {
                         .getString("InventoryProtection.DeathGuardSystem.GuardEntityType").toUpperCase()),
                 "Death Guard");
         lastStoredLocation = owner.getLocation();
-        deathGuardNPC.spawn(lastStoredLocation);
-        tryToSpawnEntity();
         lastHealth = Main.getInstance().getConfig().getDouble("InventoryProtection.DeathGuardSystem.ProtectSeconds");
+        deathGuardNPC.spawn(lastStoredLocation);
         timer = new BukkitRunnable() {
             @Override
             public void run() {
-                if (!deathGuardNPC.isSpawned() && endOfLife) {
+                if (endOfLife) {
                     timer.cancel();
                     return;
                 }
-                if (!endOfLife && !deathGuardNPC.isSpawned()) {
-                    tryToSpawnEntity();
-                }
+                lastHealth--;
                 if (deathGuardNPC.isSpawned()) {
-                    deathGuardNPC.getBukkitEntity().damage(1);
-                }
-                // AKA chunk is unloaded
-                if (lastHealth == deathGuardNPC.getBukkitEntity().getHealth()) {
-                    deathGuardNPC.getBukkitEntity().setHealth(lastHealth - 1 < 0 ? 0 : lastHealth - 1);
-                    // Specially handle unloaded death guards
-                    if (deathGuardNPC.getBukkitEntity().getHealth() <= 0) {
+                    deathGuardNPC.setProtected(true);
+                    deathGuardNPC.getBukkitEntity().damage(0);
+                    deathGuardNPC.getBukkitEntity().setMaxHealth(
+                            Main.getInstance().getConfig()
+                                    .getDouble("InventoryProtection.DeathGuardSystem.ProtectSeconds"));
+                    deathGuardNPC.getBukkitEntity().setHealth(lastHealth);
+                    lastStoredLocation = deathGuardNPC.getBukkitEntity().getLocation();
+                    storedOwnerName = getOwner() != null ? getOwner().getName() : storedOwnerName;
+                    updateName();
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            deathGuardNPC.setProtected(false);
+                        }
+                    }.runTaskLater(Main.getInstance(), 20L);
+                } else {
+                    if (lastHealth <= 0) {
                         destroy();
                         ArrayList<DeathGuard> needToRemove = new ArrayList<DeathGuard>();
                         for (final DeathGuard deathGuard: DeathGuard.getAllDeathGuards()) {
@@ -89,50 +96,25 @@ public class DeathGuard implements Listener {
                         }
                         needToRemove.clear();
                         needToRemove = null;
-                        return;
                     }
                 }
-                lastHealth = deathGuardNPC.getBukkitEntity().getHealth();
-                lastStoredLocation = deathGuardNPC.getBukkitEntity().getLocation();
-                storedOwnerName = getOwner() != null ? getOwner().getName() : storedOwnerName;
-                updateName();
             }
         };
         timer.runTaskTimer(Main.getInstance(), 0L, 20L);
     }
 
     @Override
-    @SuppressWarnings("deprecation")
     public String toString() {
-        return MessageFormat.format(Lang.GUARD_TO_STRING.toString(), getOwnerName(), StringUtils
-                .locationToString(deathGuardNPC.getStoredLocation()), deathGuardNPC.isSpawned() ? deathGuardNPC
-                .getBukkitEntity().getHealth() : 0);
+        return MessageFormat.format(Lang.GUARD_TO_STRING.toString(), getOwnerName(),
+                StringUtils.locationToString(lastStoredLocation), lastHealth);
     }
 
-    @SuppressWarnings("deprecation")
-    public void tryToSpawnEntity() {
-        deathGuardNPC.setProtected(true);
-        deathGuardNPC.spawn(lastStoredLocation);
-        if (deathGuardNPC.isSpawned()) {
-            deathGuardNPC.getBukkitEntity().setMaxHealth(
-                    Main.getInstance().getConfig().getDouble("InventoryProtection.DeathGuardSystem.ProtectSeconds"));
-            deathGuardNPC.getBukkitEntity().setHealth(lastHealth);
-            Main.getInstance().getServer().getScheduler().runTaskLater(Main.getInstance(), new Runnable() {
-                @Override
-                public void run() {
-                    deathGuardNPC.setProtected(false);
-                }
-            }, 20L);
-        }
-    }
-
-    @SuppressWarnings("deprecation")
     public void updateName() {
         if (!deathGuardNPC.isSpawned()) {
             return;
         }
         deathGuardNPC.setName(MessageFormat.format(Lang.GUARD_NAME_FORMAT.toString(), getOwnerName(),
-                Math.round(deathGuardNPC.getBukkitEntity().getHealth()),
+                Math.round(lastHealth),
                 Main.getInstance().getConfig().getInt("InventoryProtection.DeathGuardSystem.ProtectSeconds")));
     }
 
@@ -308,6 +290,12 @@ public class DeathGuard implements Listener {
     public String getOwnerName() {
         return getOwner() != null ? getOwner().getName() : storedOwnerName != null ? storedOwnerName
                 : Lang.OFFLINE_PLAYER.toString();
+    }
+
+    public void modifyLastHealth(double value) {
+        double maxHealth = Main.getInstance().getConfig()
+                .getDouble("InventoryProtection.DeathGuardSystem.ProtectSeconds");
+        lastHealth = lastHealth + value < 0 ? 0 : lastHealth + value > maxHealth ? maxHealth : lastHealth + value;
     }
 
     public boolean isEndOfLife() {

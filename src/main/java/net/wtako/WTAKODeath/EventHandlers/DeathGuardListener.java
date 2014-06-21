@@ -19,6 +19,7 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 
 public class DeathGuardListener implements Listener {
 
+    @SuppressWarnings("deprecation")
     @EventHandler
     public static void onGuardGetDamage(NPCDamageByEntityEvent event) {
         DeathGuard targetDeathGuard = null;
@@ -50,17 +51,21 @@ public class DeathGuardListener implements Listener {
         if (Main.getInstance().getConfig().getBoolean("InventoryProtection.DeathGuardSystem.Attack.Enable")
                 && attacker.hasPermission(Main.getInstance().getProperty("artifactId") + ".canAttackGuard")
                 && FactionUtils.canAttack(targetDeathGuard.getOwner(), attacker)) {
-            int damage = ((Long) Math.round(event.getDamage()
+            final int damage = ((Long) Math.round(event.getDamage()
                     * Main.getInstance().getConfig()
                             .getDouble("InventoryProtection.DeathGuardSystem.Attack.DamageToSecondFactor"))).intValue();
             event.setDamage(damage);
             targetDeathGuard.notifyAttack(attacker.getName());
             targetDeathGuard.hitBack(attacker);
+            final double testHealth = targetDeathGuard.getDeathGuardNPC().getBukkitEntity().getHealth();
             final DeathGuard taskTargetDeathGuard = targetDeathGuard;
             Main.getInstance().getServer().getScheduler().runTaskLater(Main.getInstance(), new Runnable() {
                 @Override
                 public void run() {
                     taskTargetDeathGuard.updateName();
+                    if (taskTargetDeathGuard.getDeathGuardNPC().getBukkitEntity().getHealth() != testHealth) {
+                        taskTargetDeathGuard.modifyLastHealth(-damage);
+                    }
                 }
             }, 1L);
             targetDeathGuard.updateName();
