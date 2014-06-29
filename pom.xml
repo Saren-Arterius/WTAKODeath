@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.wtako</groupId>
 	<artifactId>WTAKODeath</artifactId>
-	<version>0.0.2</version>
+	<version>0.0.2b</version>
 	<name>WTAKODeath</name>
 	<description>WTAKO Death control plugin</description>
 	<url>https://gitlab.wtako.net/Saren/wtakodeath</url>

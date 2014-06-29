@@ -46,7 +46,7 @@ public class DeathGuard implements Listener {
     private Location                     lastStoredLocation;
 
     @SuppressWarnings("deprecation")
-    public DeathGuard(final Player owner, ArrayList<ItemStack> itemStacks, double exp) {
+    public DeathGuard(final Player owner, ArrayList<ItemStack> itemStacks, double exp, final double maxHealth) {
         ownerID = owner.getUniqueId();
         this.itemStacks = itemStacks;
         this.exp = exp;
@@ -56,7 +56,7 @@ public class DeathGuard implements Listener {
                         .getString("InventoryProtection.DeathGuardSystem.GuardEntityType").toUpperCase()),
                 "Death Guard");
         lastStoredLocation = owner.getLocation();
-        lastHealth = Main.getInstance().getConfig().getDouble("InventoryProtection.DeathGuardSystem.ProtectSeconds");
+        lastHealth = maxHealth;
         deathGuardNPC.spawn(lastStoredLocation);
         timer = new BukkitRunnable() {
             @Override
@@ -69,9 +69,7 @@ public class DeathGuard implements Listener {
                 if (deathGuardNPC.isSpawned()) {
                     deathGuardNPC.setProtected(true);
                     deathGuardNPC.getBukkitEntity().damage(0);
-                    deathGuardNPC.getBukkitEntity().setMaxHealth(
-                            Main.getInstance().getConfig()
-                                    .getDouble("InventoryProtection.DeathGuardSystem.ProtectSeconds"));
+                    deathGuardNPC.getBukkitEntity().setMaxHealth(maxHealth);
                     deathGuardNPC.getBukkitEntity().setHealth(lastHealth);
                     lastStoredLocation = deathGuardNPC.getBukkitEntity().getLocation();
                     storedOwnerName = getOwner() != null ? getOwner().getName() : storedOwnerName;

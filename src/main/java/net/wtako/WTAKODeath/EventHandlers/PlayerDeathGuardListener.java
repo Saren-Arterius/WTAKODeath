@@ -7,10 +7,13 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
 
 import net.wtako.WTAKODeath.Main;
+import net.wtako.WTAKODeath.Events.PlayerDeathPreProtectEvent;
+import net.wtako.WTAKODeath.Events.PlayerDeathProtectEvent;
 import net.wtako.WTAKODeath.Methods.DeathGuard;
 import net.wtako.WTAKODeath.Utils.ExperienceManager;
 import net.wtako.WTAKODeath.Utils.ItemStackUtils;
@@ -18,14 +21,16 @@ import net.wtako.WTAKODeath.Utils.Lang;
 import net.wtako.WTAKODeath.Utils.StringUtils;
 
 import org.bukkit.GameMode;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import com.sk89q.worldguard.bukkit.BukkitUtil;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
@@ -38,12 +43,15 @@ public class PlayerDeathGuardListener implements Listener {
     private static HashMap<UUID, ArrayList<ItemStack>> returnItemsOnRespawn = new HashMap<UUID, ArrayList<ItemStack>>();
     private static HashMap<UUID, Long>                 deathThrottle        = new HashMap<UUID, Long>();
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler
     public static void onPlayerDeath(final PlayerDeathEvent event) {
         if (event.getEntity().getGameMode() == GameMode.CREATIVE) {
             return;
         }
-        boolean worldGuardAllows = true;
+        if (event.getEntity().getWorld().getGameRuleValue("keepInventory").toLowerCase().startsWith("t")) {
+            return;
+        }
+        boolean worldGuardAllows = Main.getInstance().getConfig().getBoolean("InventoryProtection.Enable");
         if (PlayerDeathGuardListener.deathThrottle.containsKey(event.getEntity().getUniqueId())
                 && PlayerDeathGuardListener.deathThrottle.get(event.getEntity().getUniqueId()) > System
                         .currentTimeMillis()) {
@@ -71,165 +79,138 @@ public class PlayerDeathGuardListener implements Listener {
         if (!event.getEntity().hasPermission(
                 Main.getInstance().getProperty("artifactId") + ".canHaveDeathItemProtection")
                 || !worldGuardAllows) {
-            if (Main.getInstance().getConfig().getBoolean("InventoryProtection.EnableItemLog")) {
-                Main.getInstance().getServer().getScheduler()
-                        .runTaskLaterAsynchronously(Main.getInstance(), new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    final FileWriter writer = new FileWriter(new File(Main.getInstance()
-                                            .getDataFolder(), "log.log"), true);
-                                    final Date currentDate = new Date(System.currentTimeMillis());
-                                    for (final ItemStack itemStack: event.getDrops()) {
-                                        writer.append(MessageFormat.format(Lang.LOG_FORMAT_ITEM_DROPPED.toString()
-                                                + "\r\n", currentDate, event.getEntity().getName(),
-                                                itemStack.toString(),
-                                                StringUtils.locationToString(event.getEntity().getLocation())));
-                                    }
-                                    writer.close();
-                                } catch (final IOException e) {
-                                    event.getEntity().sendMessage(
-                                            MessageFormat.format(Lang.ERROR_HOOKING.toString(), "Logger"));
-                                    e.printStackTrace();
-                                }
-                            }
-                        }, 10L);
-            }
+            PlayerDeathGuardListener.logItemsToFile(event.getEntity(), event.getDrops(), false, 8L);
             if (Main.getInstance().getConfig().getBoolean("InventoryProtection.EnableEXPLog")) {
-                Main.getInstance().getServer().getScheduler()
-                        .runTaskLaterAsynchronously(Main.getInstance(), new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    final FileWriter writer = new FileWriter(new File(Main.getInstance()
-                                            .getDataFolder(), "log.log"), true);
-                                    writer.append(MessageFormat.format(Lang.LOG_FORMAT_EXP_KEPT_GUARDED.toString()
-                                            + "\r\n", new Date(System.currentTimeMillis()),
-                                            event.getEntity().getName(), 0, 0, manager.getCurrentExp()));
-                                    writer.close();
-                                } catch (final IOException e) {
-                                    event.getEntity().sendMessage(
-                                            MessageFormat.format(Lang.ERROR_HOOKING.toString(), "Logger"));
-                                    e.printStackTrace();
-                                }
-                            }
-                        }, 10L);
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            final FileWriter writer = new FileWriter(new File(Main.getInstance().getDataFolder(),
+                                    "log.log"), true);
+                            writer.append(MessageFormat.format(Lang.LOG_FORMAT_EXP_KEPT_GUARDED.toString() + "\r\n",
+                                    new Date(System.currentTimeMillis()), event.getEntity().getName(), 0, 0,
+                                    manager.getCurrentExp()));
+                            writer.close();
+                        } catch (final IOException e) {
+                            event.getEntity()
+                                    .sendMessage(MessageFormat.format(Lang.ERROR_HOOKING.toString(), "Logger"));
+                            e.printStackTrace();
+                        }
+                    }
+                }.runTaskLaterAsynchronously(Main.getInstance(), 2L);
             }
             return;
         }
 
-        if (!Main.getInstance().getConfig().getBoolean("InventoryProtection.Enable")) {
+        final PlayerDeathPreProtectEvent playerDeathPreProtectEvent = new PlayerDeathPreProtectEvent(event.getEntity(),
+                PlayerDeathGuardListener.getPercentage(Main.getInstance().getConfig()
+                        .getInt("InventoryProtection.ItemRetainPercentage")),
+                PlayerDeathGuardListener.getPercentage(Main.getInstance().getConfig()
+                        .getInt("InventoryProtection.ExpRetainPercentage")),
+                PlayerDeathGuardListener.getPercentage(Main.getInstance().getConfig()
+                        .getInt("InventoryProtection.DeathGuardSystem.ExpDeletePercentage")));
+        Main.getInstance().getServer().getPluginManager().callEvent(playerDeathPreProtectEvent);
+
+        final ArrayList<ArrayList<ItemStack>> keepAndDrop = ItemStackUtils.getSampleOfItemStack(event.getDrops(),
+                playerDeathPreProtectEvent.getItemRetainPercentage());
+        final double guardMaxHealth = Main.getInstance().getConfig()
+                .getDouble("InventoryProtection.DeathGuardSystem.ProtectSeconds");
+        final int guardExpPercentage = PlayerDeathGuardListener.getPercentage(100
+                - playerDeathPreProtectEvent.getKeepExpPercentage()
+                - playerDeathPreProtectEvent.getDeleteExpPercentage());
+        final float expKept = manager.getCurrentExp() * (playerDeathPreProtectEvent.getKeepExpPercentage() / 100F);
+        final float expGuard = manager.getCurrentExp() * (guardExpPercentage / 100F);
+        final PlayerDeathProtectEvent playerDeathProtectEvent = new PlayerDeathProtectEvent(event.getEntity(),
+                keepAndDrop.get(0), keepAndDrop.get(1), manager.getCurrentExp(), expKept, expGuard, guardMaxHealth);
+        Main.getInstance().getServer().getPluginManager().callEvent(playerDeathProtectEvent);
+
+        if (Main.getInstance().getConfig().getBoolean("InventoryProtection.EnableEXPLog")) {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    try {
+                        final FileWriter writer = new FileWriter(
+                                new File(Main.getInstance().getDataFolder(), "log.log"), true);
+                        writer.append(MessageFormat.format(Lang.LOG_FORMAT_EXP_KEPT_GUARDED.toString() + "\r\n",
+                                new Date(System.currentTimeMillis()), event.getEntity().getName(),
+                                playerDeathProtectEvent.getExpKept(), playerDeathProtectEvent.getExpGuarded(),
+                                playerDeathProtectEvent.getExpBeforeDeath()));
+                        writer.close();
+                    } catch (final IOException e) {
+                        event.getEntity().sendMessage(MessageFormat.format(Lang.ERROR_HOOKING.toString(), "Logger"));
+                        e.printStackTrace();
+                    }
+                }
+            }.runTaskLaterAsynchronously(Main.getInstance(), 2L);
+        }
+
+        if (playerDeathProtectEvent.isCancelled()) {
+            PlayerDeathGuardListener.logItemsToFile(event.getEntity(), event.getDrops(), false, 10L);
             return;
         }
 
-        final ArrayList<ArrayList<ItemStack>> keepAndDrop = ItemStackUtils.getSampleOfItemStack(event.getDrops(), Main
-                .getInstance().getConfig().getInt("InventoryProtection.ItemRetainPercentage"));
-
-        if (Main.getInstance().getConfig().getBoolean("InventoryProtection.EnableItemLog")) {
-            Main.getInstance().getServer().getScheduler()
-                    .runTaskLaterAsynchronously(Main.getInstance(), new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                final FileWriter writer = new FileWriter(new File(Main.getInstance().getDataFolder(),
-                                        "log.log"), true);
-                                final Date currentDate = new Date(System.currentTimeMillis());
-                                for (final ItemStack itemStack: keepAndDrop.get(0)) {
-                                    writer.append(MessageFormat.format(Lang.LOG_FORMAT_ITEM_KEPT.toString() + "\r\n",
-                                            currentDate, event.getEntity().getName(), itemStack.toString()));
-                                }
-                                for (final ItemStack itemStack: keepAndDrop.get(1)) {
-                                    writer.append(MessageFormat.format(
-                                            Lang.LOG_FORMAT_ITEM_DROPPED.toString() + "\r\n", currentDate, event
-                                                    .getEntity().getName(), itemStack.toString(), StringUtils
-                                                    .locationToString(event.getEntity().getLocation())));
-                                }
-                                writer.close();
-                            } catch (final IOException e) {
-                                event.getEntity().sendMessage(
-                                        MessageFormat.format(Lang.ERROR_HOOKING.toString(), "Logger"));
-                                e.printStackTrace();
-                            }
-                        }
-                    }, 10L);
+        event.getDrops().clear();
+        manager.setExp(playerDeathProtectEvent.getExpKept());
+        if (Main.getInstance().getConfig().getBoolean("InventoryProtection.DeathGuardSystem.Enable")
+                && event.getEntity().hasPermission(Main.getInstance().getProperty("artifactId") + ".canHaveGuard")
+                && playerDeathProtectEvent.useDeathGuard()) {
+            final DeathGuard deathGuard = new DeathGuard(event.getEntity(), playerDeathProtectEvent.getDropItems(),
+                    Math.round(playerDeathProtectEvent.getExpGuarded()), playerDeathProtectEvent.getGuardMaxHealth());
+            DeathGuard.getAllDeathGuards().add(deathGuard);
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    event.getEntity().sendMessage(
+                            MessageFormat.format(Lang.GUARD_SPAWN.toString(), deathGuard.toString()));
+                    event.getEntity().sendMessage(Lang.HELP_GUARDS.toString());
+                }
+            }.runTaskLaterAsynchronously(Main.getInstance(), 10L);
+            PlayerDeathGuardListener.logItemsToFile(event.getEntity(), playerDeathProtectEvent.getDropItems(), false,
+                    8L);
+        } else {
+            event.getDrops().addAll(playerDeathProtectEvent.getDropItems());
+            PlayerDeathGuardListener.logItemsToFile(event.getEntity(), event.getDrops(), false, 8L);
+            event.getEntity().getWorld().spawn(event.getEntity().getLocation(), ExperienceOrb.class)
+                    .setExperience(Math.round(playerDeathProtectEvent.getExpGuarded()));
         }
-
-        PlayerDeathGuardListener.returnItemsOnRespawn.put(event.getEntity().getUniqueId(), keepAndDrop.get(0));
-
-        final int keepExpPercentage = PlayerDeathGuardListener.getPercentage(Main.getInstance().getConfig()
-                .getInt("InventoryProtection.ExpRetainPercentage"));
-        final int deleteExpPercentage = PlayerDeathGuardListener.getPercentage(Main.getInstance().getConfig()
-                .getInt("InventoryProtection.DeathGuardSystem.ExpDeletePercentage"));
-        final int guardExpPercentage = PlayerDeathGuardListener.getPercentage(100 - keepExpPercentage
-                - deleteExpPercentage);
-
-        final float expBeforeDeath = manager.getCurrentExp() * (keepExpPercentage / 100F);
-        final float expKept = expBeforeDeath * (keepExpPercentage / 100F);
-        final float expGuard = expBeforeDeath * (guardExpPercentage / 100F);
-
-        Main.getInstance().getServer().getScheduler().runTaskLaterAsynchronously(Main.getInstance(), new Runnable() {
+        new BukkitRunnable() {
             @Override
             public void run() {
                 event.getEntity().sendMessage(
-                        MessageFormat.format(Lang.YOU_KEPT_ITEMS_LEVELS.toString(), keepAndDrop.get(0).size(),
-                                manager.getLevelForExp(Math.round(expKept))));
+                        MessageFormat.format(Lang.YOU_KEPT_ITEMS_LEVELS.toString(), playerDeathProtectEvent
+                                .getKeepItems().size(), manager.getLevelForExp(Math.round(playerDeathProtectEvent
+                                .getExpGuarded()))));
             }
-        }, 8L);
-
-        if (Main.getInstance().getConfig().getBoolean("InventoryProtection.EnableEXPLog")) {
-            Main.getInstance().getServer().getScheduler()
-                    .runTaskLaterAsynchronously(Main.getInstance(), new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                final FileWriter writer = new FileWriter(new File(Main.getInstance().getDataFolder(),
-                                        "log.log"), true);
-                                writer.append(MessageFormat.format(
-                                        Lang.LOG_FORMAT_EXP_KEPT_GUARDED.toString() + "\r\n",
-                                        new Date(System.currentTimeMillis()), event.getEntity().getName(), expKept,
-                                        expGuard, expBeforeDeath));
-                                writer.close();
-                            } catch (final IOException e) {
-                                event.getEntity().sendMessage(
-                                        MessageFormat.format(Lang.ERROR_HOOKING.toString(), "Logger"));
-                                e.printStackTrace();
-                            }
-                        }
-                    }, 10L);
-        }
-
-        if (Main.getInstance().getConfig().getBoolean("InventoryProtection.DeathGuardSystem.Enable")
-                && event.getEntity().hasPermission(Main.getInstance().getProperty("artifactId") + ".canHaveGuard")) {
-            final DeathGuard deathGuard = new DeathGuard(event.getEntity(), keepAndDrop.get(1), Math.round(expGuard));
-            DeathGuard.getAllDeathGuards().add(deathGuard);
-            Main.getInstance().getServer().getScheduler()
-                    .runTaskLaterAsynchronously(Main.getInstance(), new Runnable() {
-                        @Override
-                        public void run() {
-                            event.getEntity().sendMessage(
-                                    MessageFormat.format(Lang.GUARD_SPAWN.toString(), deathGuard.toString()));
-                            event.getEntity().sendMessage(Lang.HELP_GUARDS.toString());
-                        }
-                    }, 10L);
-            event.getDrops().clear();
-            manager.setExp(expKept);
-        } else {
-            event.getDrops().clear();
-            event.getDrops().addAll(keepAndDrop.get(1));
-            manager.setExp(expKept);
-        }
+        }.runTaskLaterAsynchronously(Main.getInstance(), 8L);
+        PlayerDeathGuardListener.returnItemsOnRespawn.put(event.getEntity().getUniqueId(),
+                playerDeathProtectEvent.getKeepItems());
+        PlayerDeathGuardListener.logItemsToFile(event.getEntity(), playerDeathProtectEvent.getKeepItems(), true, 5L);
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler
     public static void onPlayerRespawn(final PlayerRespawnEvent event) {
         if (!event.getPlayer().hasPermission(
                 Main.getInstance().getProperty("artifactId") + ".canHaveDeathItemProtection")
                 || !PlayerDeathGuardListener.returnItemsOnRespawn.containsKey(event.getPlayer().getUniqueId())) {
             return;
         }
-        for (final ItemStack itemStack: PlayerDeathGuardListener.returnItemsOnRespawn.remove(event.getPlayer()
-                .getUniqueId())) {
-            ItemStackUtils.giveToPlayerOrDrop(itemStack, event.getPlayer(), event.getRespawnLocation());
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                event.getPlayer().getInventory().clear();
+                for (final ItemStack itemStack: PlayerDeathGuardListener.returnItemsOnRespawn.remove(event.getPlayer()
+                        .getUniqueId())) {
+                    ItemStackUtils.giveToPlayerOrDrop(itemStack, event.getPlayer(), event.getRespawnLocation());
+                }
+            }
+        }.runTaskLater(Main.getInstance(), 20L);
+
+    }
+
+    @EventHandler
+    public static void onPlayerPickupItem(PlayerPickupItemEvent event) {
+        if (PlayerDeathGuardListener.returnItemsOnRespawn.containsKey(event.getPlayer().getUniqueId())) {
+            event.setCancelled(true);
         }
     }
 
@@ -257,6 +238,37 @@ public class PlayerDeathGuardListener implements Listener {
             }
         }
         PlayerDeathGuardListener.returnItemsOnRespawn.clear();
+    }
+
+    public static void logItemsToFile(final Player player, final List<ItemStack> items, final boolean isKeep, Long delay) {
+        if (Main.getInstance().getConfig().getBoolean("InventoryProtection.EnableItemLog")) {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    try {
+                        final FileWriter writer = new FileWriter(
+                                new File(Main.getInstance().getDataFolder(), "log.log"), true);
+                        final Date currentDate = new Date(System.currentTimeMillis());
+                        if (isKeep) {
+                            for (final ItemStack itemStack: items) {
+                                writer.append(MessageFormat.format(Lang.LOG_FORMAT_ITEM_KEPT.toString() + "\r\n",
+                                        currentDate, player.getName(), itemStack.toString()));
+                            }
+                        } else {
+                            for (final ItemStack itemStack: items) {
+                                writer.append(MessageFormat.format(Lang.LOG_FORMAT_ITEM_DROPPED.toString() + "\r\n",
+                                        currentDate, player.getName(), itemStack.toString(),
+                                        StringUtils.locationToString(player.getLocation())));
+                            }
+                        }
+                        writer.close();
+                    } catch (final IOException e) {
+                        player.sendMessage(MessageFormat.format(Lang.ERROR_HOOKING.toString(), "Logger"));
+                        e.printStackTrace();
+                    }
+                }
+            }.runTaskLaterAsynchronously(Main.getInstance(), delay);
+        }
     }
 
 }
