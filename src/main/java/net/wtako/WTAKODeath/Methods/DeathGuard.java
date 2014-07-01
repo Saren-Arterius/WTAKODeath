@@ -66,6 +66,7 @@ public class DeathGuard implements Listener {
                     return;
                 }
                 lastHealth--;
+                lastHealth = lastHealth < 0 ? 0 : lastHealth;
                 if (deathGuardNPC.isSpawned()) {
                     deathGuardNPC.setProtected(true);
                     deathGuardNPC.getBukkitEntity().damage(0);
