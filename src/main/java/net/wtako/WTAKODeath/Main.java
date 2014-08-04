@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.wtako.WTAKODeath.Commands.CommandWdt;
+import net.wtako.WTAKODeath.Commands.Wdt.ArgBless;
 import net.wtako.WTAKODeath.EventHandlers.DeathGuardListener;
 import net.wtako.WTAKODeath.EventHandlers.PlayerDeathGuardListener;
 import net.wtako.WTAKODeath.EventHandlers.PlayerDeathInfoListener;
@@ -39,6 +40,7 @@ public final class Main extends JavaPlugin {
     public void onDisable() {
         PlayerDeathGuardListener.returnAllItemsNow();
         DeathGuard.killAllDeathGuards();
+        ArgBless.inCoversation.clear();
     }
 
     public void loadLang() {

@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 import java.util.UUID;
 
 import net.wtako.WTAKODeath.Main;
+import net.wtako.WTAKODeath.Commands.Wdt.ArgBless;
 import net.wtako.WTAKODeath.Events.PlayerDeathPreProtectEvent;
 import net.wtako.WTAKODeath.Events.PlayerDeathProtectEvent;
 import net.wtako.WTAKODeath.Methods.DeathGuard;
@@ -26,6 +27,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
@@ -211,6 +213,19 @@ public class PlayerDeathGuardListener implements Listener {
     public static void onPlayerPickupItem(PlayerPickupItemEvent event) {
         if (PlayerDeathGuardListener.returnItemsOnRespawn.containsKey(event.getPlayer().getUniqueId())) {
             event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onBlessConversation(AsyncPlayerChatEvent event) {
+        if (!ArgBless.inCoversation.containsKey(event.getPlayer().getUniqueId())) {
+            return;
+        }
+        if (event.getMessage().equalsIgnoreCase("yes")) {
+            event.setCancelled(true);
+            ArgBless.proceed(event.getPlayer().getUniqueId());
+        } else {
+            ArgBless.fail(event.getPlayer().getUniqueId());
         }
     }
 

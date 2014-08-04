@@ -40,6 +40,16 @@ public enum Lang {
     GUARD_UNDER_ATTACK("guard-under-attack", "&cYour {0} is under attack! (Attacker: {1})"),
     GUARD_NOT_ENOUGH_EXP_BLESS("guard-not-enough-exp-bless", "&eYou do not have enough exp to bless {0}''s Guard."),
     GUARD_HIT_YOU_BACK("guard-hit-you-back", "&e{0}''s Guard hit you back with its wrath!"),
+    GUARD_PAY_TO_GIVE_BACK(
+            "guard-hit-to-give-back",
+            "&eNotice: it costs ${0} blessing each Death Guard of yours. Type 'yes' to proceed."),
+    GUARD_PAY_TO_GIVE_BACK_CANCELLED("guard-hit-to-give-back-cancelled", "&eCancelled blessing process."),
+    GUARD_PAY_TO_GIVE_BACK_SUCCEED(
+            "guard-hit-to-give-back-succeed",
+            "&aSuccessfully blessed {0} Death Guards using ${1}."),
+    GUARD_PAY_TO_GIVE_BACK_NOT_ENOUGH_MONEY(
+            "guard-hit-to-give-back-not-enough-money",
+            "&eYou do not have enough money to bless all your Death Guards."),
     OFFLINE_PLAYER("offline-player", "Offline player"),
     ALL_GUARDS_KILLED("all-guards-killed", "&aSuccessfully killed all death guards."),
     YOU_DONT_HAVE_GUARDS("you-dont-have-guards", "&eYou do not have any death guards."),
@@ -56,6 +66,8 @@ public enum Lang {
             + " guards&f to view all of your death guards."),
     HELP_DIE("help-die", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
             + " die&f to kill all of your death guards."),
+    HELP_BLESS("help-bless", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
+            + " bless&f to bless all of your death guards (Giving your items back using money)."),
     HELP_ALL_GUARDS("help-all-guards", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
             + " allguards&f to list all the death guards. &c(OP only)"),
     HELP_CLEAR("help-clear", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()

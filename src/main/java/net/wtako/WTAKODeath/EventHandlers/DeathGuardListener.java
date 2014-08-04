@@ -1,6 +1,7 @@
 package net.wtako.WTAKODeath.EventHandlers;
 
 import java.text.MessageFormat;
+import java.util.Random;
 
 import net.citizensnpcs.api.event.NPCDamageByEntityEvent;
 import net.citizensnpcs.api.event.NPCDeathEvent;
@@ -9,6 +10,7 @@ import net.wtako.WTAKODeath.Methods.DeathGuard;
 import net.wtako.WTAKODeath.Utils.FactionUtils;
 import net.wtako.WTAKODeath.Utils.Lang;
 
+import org.bukkit.World.Environment;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -21,7 +23,7 @@ public class DeathGuardListener implements Listener {
 
     @SuppressWarnings("deprecation")
     @EventHandler
-    public static void onGuardGetDamage(NPCDamageByEntityEvent event) {
+    public void onGuardGetDamage(NPCDamageByEntityEvent event) {
         DeathGuard targetDeathGuard = null;
         for (final DeathGuard deathGuard: DeathGuard.getAllDeathGuards()) {
             if (event.getNPC() == deathGuard.getDeathGuardNPC()) {
@@ -84,7 +86,7 @@ public class DeathGuardListener implements Listener {
 
     @SuppressWarnings("deprecation")
     @EventHandler
-    public static void onGuardGetDamage(EntityDamageEvent event) {
+    public void onGuardGetDamage(EntityDamageEvent event) {
         if (!(event.getEntity() instanceof LivingEntity)) {
             return;
         }
@@ -94,7 +96,14 @@ public class DeathGuardListener implements Listener {
                     && !(event instanceof EntityDamageByEntityEvent)) {
                 event.setCancelled(true);
                 if (event.getCause() == DamageCause.SUFFOCATION) {
-                    livingEntity.teleport(livingEntity.getLocation().add(1, 1, 1));
+                    if (livingEntity.getLocation().getWorld().getEnvironment() == Environment.NETHER
+                            && livingEntity.getLocation().getBlockY() > 110) {
+                        livingEntity.teleport(livingEntity.getLocation().add(DeathGuardListener.randInt(-2, 2),
+                                DeathGuardListener.randInt(-2, 0), DeathGuardListener.randInt(-2, 2)));
+                    } else {
+                        livingEntity.teleport(livingEntity.getLocation().add(DeathGuardListener.randInt(-2, 2),
+                                DeathGuardListener.randInt(0, 2), DeathGuardListener.randInt(-2, 2)));
+                    }
                 }
                 return;
             }
@@ -103,7 +112,7 @@ public class DeathGuardListener implements Listener {
 
     @SuppressWarnings("deprecation")
     @EventHandler
-    public static void onGuardDie(NPCDeathEvent event) {
+    public void onGuardDie(NPCDeathEvent event) {
         DeathGuard targetDeathGuard = null;
         for (final DeathGuard deathGuard: DeathGuard.getAllDeathGuards()) {
             if (event.getNPC() == deathGuard.getDeathGuardNPC()) {
@@ -120,6 +129,12 @@ public class DeathGuardListener implements Listener {
             event.setDroppedExp(0);
             DeathGuard.getAllDeathGuards().remove(targetDeathGuard);
         }
+    }
+
+    public static int randInt(int min, int max) {
+        final Random rand = new Random();
+        final int randomNum = rand.nextInt((max - min) + 1) + min;
+        return randomNum;
     }
 
 }

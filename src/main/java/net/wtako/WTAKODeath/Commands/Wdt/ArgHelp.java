@@ -14,6 +14,7 @@ public class ArgHelp {
         sender.sendMessage(Lang.HELP_TSH.toString());
         sender.sendMessage(Lang.HELP_GUARDS.toString());
         sender.sendMessage(Lang.HELP_DIE.toString());
+        sender.sendMessage(Lang.HELP_BLESS.toString());
         sender.sendMessage(Lang.HELP_ALL_GUARDS.toString());
         sender.sendMessage(Lang.HELP_CLEAR.toString());
         sender.sendMessage(Lang.HELP_RELOAD.toString());

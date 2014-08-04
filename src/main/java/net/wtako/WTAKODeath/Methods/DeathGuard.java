@@ -86,7 +86,7 @@ public class DeathGuard implements Listener {
                         destroy();
                         ArrayList<DeathGuard> needToRemove = new ArrayList<DeathGuard>();
                         for (final DeathGuard deathGuard: DeathGuard.getAllDeathGuards()) {
-                            if (deathGuard.isEndOfLife()) {
+                            if (!deathGuard.isValid()) {
                                 needToRemove.add(deathGuard);
                             }
                         }
@@ -291,10 +291,6 @@ public class DeathGuard implements Listener {
         lastHealth = lastHealth + value < 0 ? 0 : lastHealth + value > maxHealth ? maxHealth : lastHealth + value;
     }
 
-    public boolean isEndOfLife() {
-        return endOfLife;
-    }
-
     public boolean isValid() {
         if (endOfLife) {
             return false;
@@ -303,6 +299,10 @@ public class DeathGuard implements Listener {
             return false;
         }
         return true;
+    }
+
+    public Location getLastStoredLocation() {
+        return lastStoredLocation;
     }
 
     public static void killAllDeathGuards() {

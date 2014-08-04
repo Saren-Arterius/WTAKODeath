@@ -19,6 +19,8 @@ InventoryProtection:
         KeepLostExp: Yes
         ExpDeletePercentage: 20
         ProtectSeconds: 900
+        # Cost money if vault is supported else cost exp, -1 to disable
+        BlessGiveBackCost: 100 
         Attack:
             Enable: Yes
             DamageToSecondFactor: 1
@@ -51,6 +53,7 @@ Translation:
     world: "Main world"
     
 System:
+    VaultSupport: No
     FactionsSupport: No
     # mushroom-growth deny = area disable InventoryProtection
     WorldGuardSupport: No
