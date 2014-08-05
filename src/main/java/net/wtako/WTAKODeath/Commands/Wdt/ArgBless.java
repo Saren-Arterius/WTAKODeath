@@ -61,7 +61,7 @@ public class ArgBless implements Listener {
         final double moneyRequired = Main.getInstance().getConfig()
                 .getDouble("InventoryProtection.DeathGuardSystem.BlessGiveBackCost");
         double guardsBlessed = 0;
-        if (Main.getInstance().getConfig().getBoolean("system.VaultSupport")) {
+        if (Main.getInstance().getConfig().getBoolean("System.VaultSupport")) {
             try {
                 final RegisteredServiceProvider<Economy> provider = Main.getInstance().getServer().getServicesManager()
                         .getRegistration(net.milkbowl.vault.economy.Economy.class);
@@ -89,7 +89,7 @@ public class ArgBless implements Listener {
                 if (!deathGuard.isValid()) {
                     continue;
                 }
-                if (!man.hasExp(moneyRequired)) {
+                if (man.hasExp(moneyRequired)) {
                     man.changeExp(-moneyRequired);
                     deathGuard.giveBack();
                     guardsBlessed++;
