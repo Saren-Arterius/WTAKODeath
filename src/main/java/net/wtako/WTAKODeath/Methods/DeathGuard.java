@@ -195,7 +195,6 @@ public class DeathGuard implements Listener {
 
     }
 
-    @SuppressWarnings("deprecation")
     public void giveBack() {
         if (!isValid()) {
             return;
@@ -210,11 +209,6 @@ public class DeathGuard implements Listener {
             final ExperienceManager manager = new ExperienceManager(getOwner());
             manager.changeExp(exp);
         }
-
-        if (deathGuardNPC.getBukkitEntity() != null && deathGuardNPC.getBukkitEntity().getHealth() > 0) {
-            deathGuardNPC.getBukkitEntity().damage(Integer.MAX_VALUE);
-        }
-
         cleanUp();
         if (getOwner() != null) {
             getOwner().sendMessage(Lang.GUARD_GAVE_BACK.toString());
@@ -232,7 +226,6 @@ public class DeathGuard implements Listener {
         }
     }
 
-    @SuppressWarnings("deprecation")
     public void destroy() {
         if (!isValid()) {
             return;
@@ -246,9 +239,6 @@ public class DeathGuard implements Listener {
         if (Main.getInstance().getConfig().getBoolean("InventoryProtection.DeathGuardSystem.KeepLostExp")) {
             world.spawn(deathGuardNPC.getStoredLocation(), ExperienceOrb.class).setExperience(
                     ((Long) Math.round(exp)).intValue());
-        }
-        if (deathGuardNPC.getBukkitEntity() != null && deathGuardNPC.getBukkitEntity().getHealth() > 0) {
-            deathGuardNPC.getBukkitEntity().damage(Integer.MAX_VALUE);
         }
         cleanUp();
         if (getOwner() != null) {
@@ -276,7 +266,7 @@ public class DeathGuard implements Listener {
         playerHits.clear();
         itemStacks.clear();
         endOfLife = true;
-        if (deathGuardNPC.isSpawned()) {
+        if (deathGuardNPC.isSpawned() || deathGuardNPC.getBukkitEntity() != null) {
             deathGuardNPC.getBukkitEntity().damage(Integer.MAX_VALUE);
         }
         final NPCRegistry registry = CitizensAPI.getNPCRegistry();
