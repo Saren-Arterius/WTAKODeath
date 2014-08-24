@@ -41,15 +41,24 @@ public enum Lang {
     GUARD_NOT_ENOUGH_EXP_BLESS("guard-not-enough-exp-bless", "&eYou do not have enough exp to bless {0}''s Guard."),
     GUARD_HIT_YOU_BACK("guard-hit-you-back", "&e{0}''s Guard hit you back with its wrath!"),
     GUARD_PAY_TO_GIVE_BACK(
-            "guard-hit-to-give-back",
+            "guard-pay-to-give-back",
             "&eNotice: it costs ${0} blessing each Death Guard of yours. Type 'yes' to proceed."),
-    GUARD_PAY_TO_GIVE_BACK_CANCELLED("guard-hit-to-give-back-cancelled", "&eCancelled blessing process."),
+    GUARD_PAY_TO_GIVE_BACK_CANCELLED("guard-pay-to-give-back-cancelled", "&eCancelled blessing process."),
     GUARD_PAY_TO_GIVE_BACK_SUCCEED(
-            "guard-hit-to-give-back-succeed",
+            "guard-pay-to-give-back-succeed",
             "&aSuccessfully blessed {0} Death Guards using ${1}."),
     GUARD_PAY_TO_GIVE_BACK_NOT_ENOUGH_MONEY(
-            "guard-hit-to-give-back-not-enough-money",
+            "guard-pay-to-give-back-not-enough-money",
             "&eYou do not have enough money to bless all your Death Guards."),
+    GUARD_PAY_ITEM_TO_GIVE_BACK(
+            "guard-pay-item-to-give-back",
+            "&eNotice: it costs {0} {1} blessing each Death Guard of yours. Type 'yes' to proceed."),
+    GUARD_PAY_ITEM_TO_GIVE_BACK_SUCCEED(
+            "guard-pay-item-to-give-back-succeed",
+            "&aSuccessfully blessed {0} Death Guards using {1} {2}."),
+    GUARD_PAY_ITEM_TO_GIVE_BACK_NOT_ENOUGH(
+            "guard-pay-item-to-give-back-not-enough",
+            "&eYou do not have enough {0} to bless all your Death Guards."),
     OFFLINE_PLAYER("offline-player", "Offline player"),
     ALL_GUARDS_KILLED("all-guards-killed", "&aSuccessfully killed all death guards."),
     YOU_DONT_HAVE_GUARDS("you-dont-have-guards", "&eYou do not have any death guards."),

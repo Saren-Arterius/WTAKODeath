@@ -19,8 +19,11 @@ InventoryProtection:
         KeepLostExp: Yes
         ExpDeletePercentage: 20
         ProtectSeconds: 900
-        # Cost money if vault is supported else cost exp, -1 to disable
-        BlessGiveBackCost: 100 
+        # -1 to disable, -2 to cost item, else money
+        BlessGiveBackCost: 100
+        BlessGiveBackItemCostMetaName: "§6Recover Stone§f"
+        BlessGiveBackItemCostType: "STONE"
+        BlessGiveBackItemCostAmount: 1
         Attack:
             Enable: Yes
             DamageToSecondFactor: 1

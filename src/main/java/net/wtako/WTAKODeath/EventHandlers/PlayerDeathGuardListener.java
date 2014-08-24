@@ -45,6 +45,7 @@ public class PlayerDeathGuardListener implements Listener {
     private static HashMap<UUID, ArrayList<ItemStack>> returnItemsOnRespawn = new HashMap<UUID, ArrayList<ItemStack>>();
     private static HashMap<UUID, Long>                 deathThrottle        = new HashMap<UUID, Long>();
 
+    @SuppressWarnings("deprecation")
     @EventHandler
     public static void onPlayerDeath(final PlayerDeathEvent event) {
         if (event.getEntity().getGameMode() == GameMode.CREATIVE) {
@@ -164,6 +165,8 @@ public class PlayerDeathGuardListener implements Listener {
                 public void run() {
                     event.getEntity().sendMessage(
                             MessageFormat.format(Lang.GUARD_SPAWN.toString(), deathGuard.toString()));
+                    event.getEntity().sendMessage(Lang.HELP_DIE.toString());
+                    event.getEntity().sendMessage(Lang.HELP_BLESS.toString());
                     event.getEntity().sendMessage(Lang.HELP_GUARDS.toString());
                 }
             }.runTaskLaterAsynchronously(Main.getInstance(), 10L);

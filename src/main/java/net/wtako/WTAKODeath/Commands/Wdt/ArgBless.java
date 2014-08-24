@@ -11,9 +11,12 @@ import net.wtako.WTAKODeath.Methods.DeathGuard;
 import net.wtako.WTAKODeath.Utils.ExperienceManager;
 import net.wtako.WTAKODeath.Utils.Lang;
 
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
 public class ArgBless implements Listener {
@@ -21,7 +24,6 @@ public class ArgBless implements Listener {
     public static HashMap<UUID, LinkedList<DeathGuard>> inCoversation = new HashMap<UUID, LinkedList<DeathGuard>>();
 
     public ArgBless(CommandSender sender) {
-
         if (Main.getInstance().getConfig().getInt("InventoryProtection.DeathGuardSystem.BlessGiveBackCost") == -1) {
             sender.sendMessage(Lang.NO_PERMISSION_COMMAND.toString());
             return;
@@ -45,9 +47,18 @@ public class ArgBless implements Listener {
             sender.sendMessage(Lang.YOU_DONT_HAVE_GUARDS.toString());
         } else {
             ArgBless.inCoversation.put(uuid, deathGuardsToBless);
-            final double moneyRequired = Main.getInstance().getConfig()
-                    .getDouble("InventoryProtection.DeathGuardSystem.BlessGiveBackCost");
-            sender.sendMessage(MessageFormat.format(Lang.GUARD_PAY_TO_GIVE_BACK.toString(), moneyRequired));
+            if (Main.getInstance().getConfig().getInt("InventoryProtection.DeathGuardSystem.BlessGiveBackCost") == -2) {
+                final String itemRequired = Main.getInstance().getConfig()
+                        .getString("InventoryProtection.DeathGuardSystem.BlessGiveBackItemCostMetaName");
+                final int itemRequiredAmount = Main.getInstance().getConfig()
+                        .getInt("InventoryProtection.DeathGuardSystem.BlessGiveBackItemCostAmount");
+                sender.sendMessage(MessageFormat.format(Lang.GUARD_PAY_ITEM_TO_GIVE_BACK.toString(),
+                        itemRequiredAmount, itemRequired));
+            } else {
+                final double moneyRequired = Main.getInstance().getConfig()
+                        .getDouble("InventoryProtection.DeathGuardSystem.BlessGiveBackCost");
+                sender.sendMessage(MessageFormat.format(Lang.GUARD_PAY_TO_GIVE_BACK.toString(), moneyRequired));
+            }
         }
     }
 
@@ -58,10 +69,27 @@ public class ArgBless implements Listener {
 
     public static void proceed(UUID uuid) {
         final Player player = Main.getInstance().getServer().getPlayer(uuid);
+        int guardsBlessed = 0;
         final double moneyRequired = Main.getInstance().getConfig()
                 .getDouble("InventoryProtection.DeathGuardSystem.BlessGiveBackCost");
-        double guardsBlessed = 0;
-        if (Main.getInstance().getConfig().getBoolean("System.VaultSupport")) {
+        final String itemNameRequired = Main.getInstance().getConfig()
+                .getString("InventoryProtection.DeathGuardSystem.BlessGiveBackItemCostMetaName");
+        final Material itemTypeRequired = Material.valueOf(Main.getInstance().getConfig()
+                .getString("InventoryProtection.DeathGuardSystem.BlessGiveBackItemCostType").toUpperCase());
+        final int itemAmountRequired = Main.getInstance().getConfig()
+                .getInt("InventoryProtection.DeathGuardSystem.BlessGiveBackItemCostAmount");
+        if (Main.getInstance().getConfig().getInt("InventoryProtection.DeathGuardSystem.BlessGiveBackCost") == -2) {
+            for (final DeathGuard deathGuard: ArgBless.inCoversation.remove(uuid)) {
+                if (ArgBless.removeItem(player.getInventory(), itemTypeRequired, itemNameRequired, itemAmountRequired)) {
+                    deathGuard.giveBack();
+                    guardsBlessed++;
+                } else {
+                    player.sendMessage(MessageFormat.format(Lang.GUARD_PAY_ITEM_TO_GIVE_BACK_NOT_ENOUGH.toString(),
+                            itemNameRequired));
+                    break;
+                }
+            }
+        } else if (Main.getInstance().getConfig().getBoolean("System.VaultSupport")) {
             try {
                 final RegisteredServiceProvider<Economy> provider = Main.getInstance().getServer().getServicesManager()
                         .getRegistration(net.milkbowl.vault.economy.Economy.class);
@@ -99,8 +127,50 @@ public class ArgBless implements Listener {
                 }
             }
         }
-        player.sendMessage(MessageFormat.format(Lang.GUARD_PAY_TO_GIVE_BACK_SUCCEED.toString(), guardsBlessed,
-                guardsBlessed * moneyRequired));
+        if (guardsBlessed > 0) {
+            if (Main.getInstance().getConfig().getInt("InventoryProtection.DeathGuardSystem.BlessGiveBackCost") == -2) {
+                player.sendMessage(MessageFormat.format(Lang.GUARD_PAY_ITEM_TO_GIVE_BACK_SUCCEED.toString(),
+                        guardsBlessed, guardsBlessed * itemAmountRequired, itemNameRequired));
+            } else {
+                player.sendMessage(MessageFormat.format(Lang.GUARD_PAY_TO_GIVE_BACK_SUCCEED.toString(), guardsBlessed,
+                        guardsBlessed * moneyRequired));
+            }
+        }
+    }
+
+    public static boolean removeItem(Inventory inventory, Material itemType, String displayName, int amount) {
+        int currentAmount = 0;
+        for (final ItemStack item: inventory) {
+            if (item == null) {
+                continue;
+            }
+            if (item.getType() == itemType && item.hasItemMeta()
+                    && item.getItemMeta().getDisplayName().equalsIgnoreCase(displayName)) {
+                currentAmount += item.getAmount();
+            }
+        }
+        if (currentAmount < amount) {
+            return false;
+        }
+        for (final ItemStack item: inventory) {
+            if (item == null) {
+                continue;
+            }
+            if (item.getType() == itemType && item.hasItemMeta()
+                    && item.getItemMeta().getDisplayName().equalsIgnoreCase(displayName)) {
+                if (item.getAmount() > amount) {
+                    item.setAmount(item.getAmount() - amount);
+                    return true;
+                } else if (item.getAmount() == amount) {
+                    inventory.remove(item);
+                    return true;
+                } else {
+                    amount -= item.getAmount();
+                    inventory.remove(item);
+                }
+            }
+        }
+        return true;
     }
 
 }

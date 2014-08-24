@@ -33,7 +33,7 @@ public class ScoreboardUtils {
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
         objective.setDisplayName(title);
 
-        final String[] messageArray = message.split("%lb%");
+        final String[] messageArray = message.split(delimiter);
         int currentScore = messageArray.length;
         for (final String item: messageArray) {
             final Score score = objective.getScore(Main
