@@ -43,59 +43,59 @@ public enum Lang {
     GUARD_PAY_TO_GIVE_BACK(
             "guard-pay-to-give-back",
             "&eNotice: it costs ${0} blessing each Death Guard of yours. Type 'yes' to proceed."),
-    GUARD_PAY_TO_GIVE_BACK_CANCELLED("guard-pay-to-give-back-cancelled", "&eCancelled blessing process."),
-    GUARD_PAY_TO_GIVE_BACK_SUCCEED(
-            "guard-pay-to-give-back-succeed",
-            "&aSuccessfully blessed {0} Death Guards using ${1}."),
-    GUARD_PAY_TO_GIVE_BACK_NOT_ENOUGH_MONEY(
-            "guard-pay-to-give-back-not-enough-money",
-            "&eYou do not have enough money to bless all your Death Guards."),
-    GUARD_PAY_ITEM_TO_GIVE_BACK(
-            "guard-pay-item-to-give-back",
-            "&eNotice: it costs {0} {1} blessing each Death Guard of yours. Type 'yes' to proceed."),
-    GUARD_PAY_ITEM_TO_GIVE_BACK_SUCCEED(
-            "guard-pay-item-to-give-back-succeed",
-            "&aSuccessfully blessed {0} Death Guards using {1} {2}."),
-    GUARD_PAY_ITEM_TO_GIVE_BACK_NOT_ENOUGH(
-            "guard-pay-item-to-give-back-not-enough",
-            "&eYou do not have enough {0} to bless all your Death Guards."),
-    OFFLINE_PLAYER("offline-player", "Offline player"),
-    ALL_GUARDS_KILLED("all-guards-killed", "&aSuccessfully killed all death guards."),
-    YOU_DONT_HAVE_GUARDS("you-dont-have-guards", "&eYou do not have any death guards."),
-    NO_GUARDS("no-guards", "&eCurrently there is no guard in this server."),
-    YOU_KEPT_ITEMS_LEVELS(
-            "you-kept-items-exp",
-            "&e{0} item(s) and {1} level(s) are kept. Items will be returned to you upon your respawn."),
+            GUARD_PAY_TO_GIVE_BACK_CANCELLED("guard-pay-to-give-back-cancelled", "&eCancelled blessing process."),
+            GUARD_PAY_TO_GIVE_BACK_SUCCEED(
+                    "guard-pay-to-give-back-succeed",
+                    "&aSuccessfully blessed {0} Death Guards using ${1}."),
+                    GUARD_PAY_TO_GIVE_BACK_NOT_ENOUGH_MONEY(
+                            "guard-pay-to-give-back-not-enough-money",
+                            "&eYou do not have enough money to bless all your Death Guards."),
+                            GUARD_PAY_ITEM_TO_GIVE_BACK(
+                                    "guard-pay-item-to-give-back",
+                                    "&eNotice: it costs {0} {1} blessing each Death Guard of yours. Type 'yes' to proceed."),
+                                    GUARD_PAY_ITEM_TO_GIVE_BACK_SUCCEED(
+                                            "guard-pay-item-to-give-back-succeed",
+                                            "&aSuccessfully blessed {0} Death Guards using {1} {2}."),
+                                            GUARD_PAY_ITEM_TO_GIVE_BACK_NOT_ENOUGH(
+                                                    "guard-pay-item-to-give-back-not-enough",
+                                                    "&eYou do not have enough {0} to bless all your Death Guards."),
+                                                    OFFLINE_PLAYER("offline-player", "Offline player"),
+                                                    ALL_GUARDS_KILLED("all-guards-killed", "&aSuccessfully killed all death guards."),
+                                                    YOU_DONT_HAVE_GUARDS("you-dont-have-guards", "&eYou do not have any death guards."),
+                                                    NO_GUARDS("no-guards", "&eCurrently there is no guard in this server."),
+                                                    YOU_KEPT_ITEMS_LEVELS(
+                                                            "you-kept-items-exp",
+                                                            "&e{0} item(s) and {1} level(s) are kept. Items will be returned to you upon your respawn."),
 
-    HELP_OFF("help-off", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
-            + " off&f to remove the display board."),
-    HELP_TSH("help-tsh", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
-            + " tsh&f to toggle death info showing on death."),
-    HELP_GUARDS("help-guards", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
-            + " guards&f to view all of your death guards."),
-    HELP_DIE("help-die", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
-            + " die&f to kill all of your death guards."),
-    HELP_BLESS("help-bless", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
-            + " bless&f to bless all of your death guards (Giving your items back using money)."),
-    HELP_ALL_GUARDS("help-all-guards", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
-            + " allguards&f to list all the death guards. &c(OP only)"),
-    HELP_CLEAR("help-clear", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
-            + " clear&f to kill (Give back or drop if owner offline) all the death guards. &c(OP only)"),
-    HELP_RELOAD("help-reload", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
-            + " reload&f to reload the plugin. &c(OP only)"),
-    LOCATION_FORMAT("location-format", "World: {0}, X: {1}, Y: {2}, Z: {3}"),
-    LOG_FORMAT_DEATH("log-format-death", "[{0}] {1} died. ({2})"),
-    LOG_FORMAT_ITEM_KEPT("log-format-item-kept", "[{0}] {1} kept {2}."),
-    LOG_FORMAT_ITEM_DROPPED("log-format-item-drop", "[{0}] {1} dropped/guarded {2}. ({3})"),
-    LOG_FORMAT_EXP_KEPT_GUARDED(
-            "log-format-exp-kept-guarded",
-            "[{0}] {1} kept {2} exp (and guarded {3}). (Before death: {4} exp)"),
-    LOG_FORMAT_GUARD_GAVE_BACK("log-format-guard-gave-back", "[{0}] {1} gaved back."),
-    LOG_FORMAT_GUARD_DESTROY("log-format-guard-destroy", "[{0}] {1} get destroyed."),
-    LOG_FORMAT_GUARD_KILLED("log-format-guard-killed", "[{0}] {1} last damaged (killed) by {2}."),
-    ERROR_HOOKING("error-hooking", "&4Error in hooking into {0}! Please contact server administrators."),
-    NO_PERMISSION_COMMAND("no-permission-command", "&cYou are not allowed to use this command."),
-    PLUGIN_RELOADED("plugin-reloaded", "&aPlugin reloaded.");
+                                                            HELP_OFF("help-off", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
+                                                                    + " off&f to remove the display board."),
+                                                                    HELP_TSH("help-tsh", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
+                                                                            + " tsh&f to toggle death info showing on death."),
+                                                                            HELP_GUARDS("help-guards", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
+                                                                                    + " guards&f to view all of your death guards."),
+                                                                                    HELP_DIE("help-die", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
+                                                                                            + " die&f to kill all of your death guards."),
+                                                                                            HELP_BLESS("help-bless", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
+                                                                                                    + " bless&f to bless all of your death guards (Giving your items back using money)."),
+                                                                                                    HELP_ALL_GUARDS("help-all-guards", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
+                                                                                                            + " allguards&f to list all the death guards. &c(OP only)"),
+                                                                                                            HELP_CLEAR("help-clear", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
+                                                                                                                    + " clear&f to kill (Give back or drop if owner offline) all the death guards. &c(OP only)"),
+                                                                                                                    HELP_RELOAD("help-reload", "Type &a/" + Main.getInstance().getProperty("mainCommand").toLowerCase()
+                                                                                                                            + " reload&f to reload the plugin. &c(OP only)"),
+                                                                                                                            LOCATION_FORMAT("location-format", "World: {0}, X: {1}, Y: {2}, Z: {3}"),
+                                                                                                                            LOG_FORMAT_DEATH("log-format-death", "[{0}] {1} died. ({2})"),
+                                                                                                                            LOG_FORMAT_ITEM_KEPT("log-format-item-kept", "[{0}] {1} kept {2}."),
+                                                                                                                            LOG_FORMAT_ITEM_DROPPED("log-format-item-drop", "[{0}] {1} dropped/guarded {2}. ({3})"),
+                                                                                                                            LOG_FORMAT_EXP_KEPT_GUARDED(
+                                                                                                                                    "log-format-exp-kept-guarded",
+                                                                                                                                    "[{0}] {1} kept {2} exp (and guarded {3}). (Before death: {4} exp)"),
+                                                                                                                                    LOG_FORMAT_GUARD_GAVE_BACK("log-format-guard-gave-back", "[{0}] {1} gaved back."),
+                                                                                                                                    LOG_FORMAT_GUARD_DESTROY("log-format-guard-destroy", "[{0}] {1} get destroyed."),
+                                                                                                                                    LOG_FORMAT_GUARD_KILLED("log-format-guard-killed", "[{0}] {1} last damaged (killed) by {2}."),
+                                                                                                                                    ERROR_HOOKING("error-hooking", "&4Error in hooking into {0}! Please contact server administrators."),
+                                                                                                                                    NO_PERMISSION_COMMAND("no-permission-command", "&cYou are not allowed to use this command."),
+                                                                                                                                    PLUGIN_RELOADED("plugin-reloaded", "&aPlugin reloaded.");
 
     private String                   path;
     private String                   def;

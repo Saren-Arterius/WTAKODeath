@@ -43,6 +43,7 @@ public final class Main extends JavaPlugin {
         ArgBless.inCoversation.clear();
     }
 
+    @SuppressWarnings("deprecation")
     public void loadLang() {
         final File lang = new File(getDataFolder(), "messages.yml");
         if (!lang.exists()) {
@@ -61,7 +62,7 @@ public final class Main extends JavaPlugin {
                 Main.log.severe("[" + Main.getInstance().getName() + "] Couldn't create language file.");
                 Main.log.severe("[" + Main.getInstance().getName() + "] This is a fatal error. Now disabling");
                 setEnabled(false); // Without it loaded, we can't send them
-                                   // messages
+                // messages
             }
         }
         final YamlConfiguration conf = YamlConfiguration.loadConfiguration(lang);
@@ -101,6 +102,7 @@ public final class Main extends JavaPlugin {
         return Main.LANG_FILE;
     }
 
+    @SuppressWarnings("deprecation")
     public String getProperty(String key) {
         final YamlConfiguration spawnConfig = YamlConfiguration.loadConfiguration(getResource("plugin.yml"));
         return spawnConfig.getString(key);

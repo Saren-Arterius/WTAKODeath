@@ -20,7 +20,6 @@ public class ScoreboardUtils {
     public static ArrayList<UUID>           noShowScoreboardPlayers = new ArrayList<UUID>();
     public static HashMap<UUID, BukkitTask> scoreboardRemoveTimers  = new HashMap<UUID, BukkitTask>();
 
-    @SuppressWarnings("deprecation")
     public static void showScoreboardMessage(String title, String message, String delimiter, final Player player,
             final Long showDelay, final Long showTime) {
         if (ScoreboardUtils.scoreboardRemoveTimers.containsKey(player.getUniqueId())) {
@@ -32,16 +31,11 @@ public class ScoreboardUtils {
         final Objective objective = board.registerNewObjective("test", "dummy");
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
         objective.setDisplayName(title);
-
         final String[] messageArray = message.split(delimiter);
         int currentScore = messageArray.length;
         for (final String item: messageArray) {
-            final Score score = objective.getScore(Main
-                    .getInstance()
-                    .getServer()
-                    .getOfflinePlayer(
-                            item.equalsIgnoreCase("") ? StringUtils.toInvisible(String.valueOf(currentScore)) : item
-                                    .substring(0, item.length() > 16 ? 15 : item.length())));
+            final Score score = objective.getScore(item.equalsIgnoreCase("") ? StringUtils.toInvisible(String
+                    .valueOf(currentScore)) : item.substring(0, item.length() > 16 ? 15 : item.length()));
             score.setScore(currentScore);
             currentScore--;
         }

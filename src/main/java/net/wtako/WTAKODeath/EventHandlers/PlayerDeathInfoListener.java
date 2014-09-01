@@ -30,27 +30,27 @@ public class PlayerDeathInfoListener implements Listener {
         PlayerDeathInfoListener.playerDeathTimes.put(victim.getUniqueId(), System.currentTimeMillis());
         if (Main.getInstance().getConfig().getBoolean("DeathInfo.EnableLog")) {
             Main.getInstance().getServer().getScheduler()
-                    .runTaskLaterAsynchronously(Main.getInstance(), new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                final FileWriter writer = new FileWriter(new File(Main.getInstance().getDataFolder(),
-                                        "log.log"), true);
-                                writer.append(MessageFormat.format(
-                                        Lang.LOG_FORMAT_DEATH.toString() + "\r\n",
-                                        new Date(System.currentTimeMillis()),
-                                        event.getEntity().getName(),
-                                        PlayerDeathInfoListener.getDeathScoreboardMessage(victim, false)
-                                                .replaceAll("(%lb%)+", "%lb%").replaceAll("^%lb%", "")
-                                                .replaceAll("%lb%$", "").replaceAll("%lb%", ", ")));
-                                writer.close();
-                            } catch (final IOException e) {
-                                event.getEntity().sendMessage(
-                                        MessageFormat.format(Lang.ERROR_HOOKING.toString(), "Logger"));
-                                e.printStackTrace();
-                            }
-                        }
-                    }, 1L);
+            .runTaskLaterAsynchronously(Main.getInstance(), new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        final FileWriter writer = new FileWriter(new File(Main.getInstance().getDataFolder(),
+                                "log.log"), true);
+                        writer.append(MessageFormat.format(
+                                Lang.LOG_FORMAT_DEATH.toString() + "\r\n",
+                                new Date(System.currentTimeMillis()),
+                                event.getEntity().getName(),
+                                PlayerDeathInfoListener.getDeathScoreboardMessage(victim, false)
+                                .replaceAll("(%lb%)+", "%lb%").replaceAll("^%lb%", "")
+                                .replaceAll("%lb%$", "").replaceAll("%lb%", ", ")));
+                        writer.close();
+                    } catch (final IOException e) {
+                        event.getEntity().sendMessage(
+                                MessageFormat.format(Lang.ERROR_HOOKING.toString(), "Logger"));
+                        e.printStackTrace();
+                    }
+                }
+            }, 1L);
         }
 
         if (!Main.getInstance().getConfig().getBoolean("DeathInfo.Show")

@@ -142,9 +142,9 @@ public class DeathGuard implements Listener {
         if (Main.getInstance().getConfig().getBoolean("InventoryProtection.DeathGuardSystem.Bless.Notify")
                 && getOwner() != null) {
             getOwner()
-                    .sendMessage(
-                            MessageFormat.format(Lang.GUARD_GET_BLESSED.toString(), blesser.getName(),
-                                    Math.round(blessSecond)));
+            .sendMessage(
+                    MessageFormat.format(Lang.GUARD_GET_BLESSED.toString(), blesser.getName(),
+                            Math.round(blessSecond)));
         }
     }
 

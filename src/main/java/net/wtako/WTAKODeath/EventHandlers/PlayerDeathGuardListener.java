@@ -57,7 +57,7 @@ public class PlayerDeathGuardListener implements Listener {
         boolean worldGuardAllows = Main.getInstance().getConfig().getBoolean("InventoryProtection.Enable");
         if (PlayerDeathGuardListener.deathThrottle.containsKey(event.getEntity().getUniqueId())
                 && PlayerDeathGuardListener.deathThrottle.get(event.getEntity().getUniqueId()) > System
-                        .currentTimeMillis()) {
+                .currentTimeMillis()) {
             worldGuardAllows = false;
         } else {
             PlayerDeathGuardListener.deathThrottle.put(event.getEntity().getUniqueId(), System.currentTimeMillis()
@@ -96,7 +96,7 @@ public class PlayerDeathGuardListener implements Listener {
                             writer.close();
                         } catch (final IOException e) {
                             event.getEntity()
-                                    .sendMessage(MessageFormat.format(Lang.ERROR_HOOKING.toString(), "Logger"));
+                            .sendMessage(MessageFormat.format(Lang.ERROR_HOOKING.toString(), "Logger"));
                             e.printStackTrace();
                         }
                     }
@@ -108,10 +108,10 @@ public class PlayerDeathGuardListener implements Listener {
         final PlayerDeathPreProtectEvent playerDeathPreProtectEvent = new PlayerDeathPreProtectEvent(event.getEntity(),
                 PlayerDeathGuardListener.getPercentage(Main.getInstance().getConfig()
                         .getInt("InventoryProtection.ItemRetainPercentage")),
-                PlayerDeathGuardListener.getPercentage(Main.getInstance().getConfig()
-                        .getInt("InventoryProtection.ExpRetainPercentage")),
-                PlayerDeathGuardListener.getPercentage(Main.getInstance().getConfig()
-                        .getInt("InventoryProtection.DeathGuardSystem.ExpDeletePercentage")));
+                        PlayerDeathGuardListener.getPercentage(Main.getInstance().getConfig()
+                                .getInt("InventoryProtection.ExpRetainPercentage")),
+                                PlayerDeathGuardListener.getPercentage(Main.getInstance().getConfig()
+                                        .getInt("InventoryProtection.DeathGuardSystem.ExpDeletePercentage")));
         Main.getInstance().getServer().getPluginManager().callEvent(playerDeathPreProtectEvent);
 
         final ArrayList<ArrayList<ItemStack>> keepAndDrop = ItemStackUtils.getSampleOfItemStack(event.getDrops(),
@@ -176,7 +176,7 @@ public class PlayerDeathGuardListener implements Listener {
             event.getDrops().addAll(playerDeathProtectEvent.getDropItems());
             PlayerDeathGuardListener.logItemsToFile(event.getEntity(), event.getDrops(), false, 8L);
             event.getEntity().getWorld().spawn(event.getEntity().getLocation(), ExperienceOrb.class)
-                    .setExperience(Math.round(playerDeathProtectEvent.getExpGuarded()));
+            .setExperience(Math.round(playerDeathProtectEvent.getExpGuarded()));
         }
         new BukkitRunnable() {
             @Override
@@ -184,7 +184,7 @@ public class PlayerDeathGuardListener implements Listener {
                 event.getEntity().sendMessage(
                         MessageFormat.format(Lang.YOU_KEPT_ITEMS_LEVELS.toString(), playerDeathProtectEvent
                                 .getKeepItems().size(), manager.getLevelForExp(Math.round(playerDeathProtectEvent
-                                .getExpGuarded()))));
+                                        .getExpGuarded()))));
             }
         }.runTaskLaterAsynchronously(Main.getInstance(), 8L);
         PlayerDeathGuardListener.returnItemsOnRespawn.put(event.getEntity().getUniqueId(),
