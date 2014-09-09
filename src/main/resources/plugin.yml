@@ -8,7 +8,7 @@ website: ${url}
 main: ${groupId}.${artifactId}.${mainClass}
 mainCommand: ${mainCommand}
 depend: [Citizens]
-softdepend: [mcore, Factions, WorldGuard]
+softdepend: [mcore, Factions, WorldGuard, WorldEdit]
 
 commands:
     ${mainCommand}:

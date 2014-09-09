@@ -34,7 +34,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import com.sk89q.worldguard.bukkit.BukkitUtil;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
@@ -45,7 +44,6 @@ public class PlayerDeathGuardListener implements Listener {
     private static HashMap<UUID, ArrayList<ItemStack>> returnItemsOnRespawn = new HashMap<UUID, ArrayList<ItemStack>>();
     private static HashMap<UUID, Long>                 deathThrottle        = new HashMap<UUID, Long>();
 
-    @SuppressWarnings("deprecation")
     @EventHandler
     public static void onPlayerDeath(final PlayerDeathEvent event) {
         if (event.getEntity().getGameMode() == GameMode.CREATIVE) {
@@ -67,8 +65,7 @@ public class PlayerDeathGuardListener implements Listener {
             try {
                 final WorldGuardPlugin worldGuard = PlayerDeathGuardListener.getWorldGuard();
                 final RegionManager regionManager = worldGuard.getRegionManager(event.getEntity().getWorld());
-                final ApplicableRegionSet set = regionManager.getApplicableRegions(BukkitUtil.toVector(event
-                        .getEntity().getLocation()));
+                final ApplicableRegionSet set = regionManager.getApplicableRegions(event.getEntity().getLocation());
                 if (!set.allows(DefaultFlag.MUSHROOMS)) {
                     worldGuardAllows = false;
                 }
